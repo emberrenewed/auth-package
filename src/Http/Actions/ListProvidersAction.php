@@ -6,12 +6,13 @@ namespace Technobase\AuthKit\Http\Actions;
 
 use Illuminate\Http\JsonResponse;
 use Technobase\AuthKit\Facades\AuthKit;
+use Technobase\AuthKit\Support\AuthKitDrivers;
 
 final class ListProvidersAction
 {
     public function __invoke(): JsonResponse
     {
-        $enabled = (array) config('auth-kit.drivers.api', []);
+        $enabled = AuthKitDrivers::enabled('api');
         $registered = AuthKit::drivers();
 
         return response()->json([

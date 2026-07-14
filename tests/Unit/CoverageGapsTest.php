@@ -11,6 +11,7 @@ use Technobase\AuthKit\Drivers\PasswordDriver;
 use Technobase\AuthKit\Exceptions\InvalidCredentialsException;
 use Technobase\AuthKit\Http\CredentialIssuers\SanctumCredentialIssuer;
 use Technobase\AuthKit\Support\DriverRegistry;
+use Technobase\AuthKit\Tests\TestCase;
 
 it('validates empty payload for web google driver', function (): void {
     $driver = new GoogleDriver(flavor: 'web');
@@ -83,6 +84,7 @@ it('requires createToken support on sanctum issuer', function (): void {
 });
 
 it('detects banned subjects via banned_at attribute', function (): void {
+    /** @var TestCase $this */
     $model = new class extends AuthenticatableUser
     {
         protected $table = 'users';

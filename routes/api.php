@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 use Illuminate\Support\Facades\Route;
 use Technobase\AuthKit\Http\Controllers\Api\AuthController;
+use Technobase\AuthKit\Support\AuthKitDrivers;
 
 $api = (array) config('auth-kit.routes.api', []);
-$drivers = (array) config('auth-kit.drivers.api', []);
+$drivers = AuthKitDrivers::enabled('api');
 
 $otpDrivers = ['email_otp', 'whatsapp_otp'];
 $socialDrivers = array_values(array_filter(

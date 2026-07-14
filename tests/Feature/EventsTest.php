@@ -10,6 +10,8 @@ use Technobase\AuthKit\Events\LoginAttempted;
 use Technobase\AuthKit\Events\LoginFailed;
 use Technobase\AuthKit\Events\LoginSucceeded;
 use Technobase\AuthKit\Events\SocialUserResolved;
+use Technobase\AuthKit\Tests\TestCase;
+use Technobase\AuthKit\Tests\TestUser;
 
 beforeEach(function (): void {
     Event::fake([
@@ -21,6 +23,7 @@ beforeEach(function (): void {
 });
 
 it('fires LoginAttempted on every attempt', function (): void {
+    /** @var TestCase $this */
     $this->createUser();
 
     $this->postJson('/api/auth/login', [
@@ -34,6 +37,7 @@ it('fires LoginAttempted on every attempt', function (): void {
 });
 
 it('fires LoginSucceeded on a valid login', function (): void {
+    /** @var TestCase $this */
     $user = $this->createUser();
 
     $this->postJson('/api/auth/login', [
@@ -42,13 +46,15 @@ it('fires LoginSucceeded on a valid login', function (): void {
     ])->assertOk();
 
     Event::assertDispatched(LoginSucceeded::class, function (LoginSucceeded $event) use ($user): bool {
-        return $event->subject->is($user)
+        return $event->subject instanceof TestUser
+            && $event->subject->is($user)
             && $event->driver === 'password'
             && $event->flavor === 'api';
     });
 });
 
 it('fires LoginFailed with reason on bad credentials', function (): void {
+    /** @var TestCase $this */
     $this->createUser();
 
     $this->postJson('/api/auth/login', [
@@ -63,6 +69,7 @@ it('fires LoginFailed with reason on bad credentials', function (): void {
 });
 
 it('fires SocialUserResolved after successful social login', function (): void {
+    /** @var TestCase $this */
     $this->createUser([
         'email' => 'google@example.com',
         'provider' => 'google',

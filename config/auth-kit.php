@@ -39,9 +39,32 @@ return [
         ],
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Enabled drivers
+    |--------------------------------------------------------------------------
+    |
+    | Set a driver to true to enable it, false to disable it. Package consumers
+    | can keep only the providers they need (e.g. Google only, Facebook only).
+    |
+    | Legacy list form is still supported: ['password', 'google'].
+    |
+    */
     'drivers' => [
-        'web' => ['password', 'google', 'facebook', 'github'],
-        'api' => ['password', 'google', 'facebook', 'github', 'email_otp', 'whatsapp_otp'],
+        'web' => [
+            'password' => true,
+            'google' => true,
+            'facebook' => true,
+            'github' => true,
+        ],
+        'api' => [
+            'password' => true,
+            'google' => true,
+            'facebook' => true,
+            'github' => true,
+            'email_otp' => true,
+            'whatsapp_otp' => true,
+        ],
     ],
 
     'throttle' => [

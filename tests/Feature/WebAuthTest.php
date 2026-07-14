@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Route;
 use Laravel\Socialite\Contracts\User;
 use Laravel\Socialite\Facades\Socialite;
 use Laravel\Socialite\Two\AbstractProvider;
+use Technobase\AuthKit\Tests\TestCase;
 
 beforeEach(function (): void {
     Route::get('/home', fn () => 'home')->name('home');
@@ -16,6 +17,7 @@ beforeEach(function (): void {
 });
 
 it('logs in via web password driver and redirects home', function (): void {
+    /** @var TestCase $this */
     $this->createUser();
 
     $response = $this->from('/login')->post('/auth/login', [
@@ -28,6 +30,7 @@ it('logs in via web password driver and redirects home', function (): void {
 });
 
 it('redirects to google oauth for web social driver', function (): void {
+    /** @var TestCase $this */
     $provider = Mockery::mock(AbstractProvider::class);
     $provider->shouldReceive('redirect')->andReturn(redirect('https://accounts.google.com/o/oauth2/auth'));
 
@@ -38,6 +41,7 @@ it('redirects to google oauth for web social driver', function (): void {
 });
 
 it('completes web google callback and logs the user in', function (): void {
+    /** @var TestCase $this */
     $this->createUser([
         'email' => 'google@example.com',
         'provider' => 'google',
@@ -59,6 +63,7 @@ it('completes web google callback and logs the user in', function (): void {
 });
 
 it('sends web forgot password with status flash', function (): void {
+    /** @var TestCase $this */
     Notification::fake();
 
     $this->createUser();

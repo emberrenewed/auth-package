@@ -2,12 +2,15 @@
 
 declare(strict_types=1);
 
+use Illuminate\Auth\Passwords\PasswordBroker;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Password;
+use Technobase\AuthKit\Tests\TestCase;
 
 it('sends reset link always returning 200 regardless of email', function (): void {
+    /** @var TestCase $this */
     Notification::fake();
 
     $this->createUser();
@@ -29,6 +32,7 @@ it('sends reset link always returning 200 regardless of email', function (): voi
 });
 
 it('resets password with valid token and revokes all tokens', function (): void {
+    /** @var TestCase $this */
     $user = $this->createUser();
 
     $tokenA = $user->createToken('a')->plainTextToken;
@@ -36,7 +40,9 @@ it('resets password with valid token and revokes all tokens', function (): void 
 
     expect($user->tokens()->count())->toBe(2);
 
-    $resetToken = Password::broker('users')->createToken($user);
+    /** @var PasswordBroker $broker */
+    $broker = Password::broker('users');
+    $resetToken = $broker->createToken($user);
 
     $response = $this->postJson('/api/auth/reset-password', [
         'email' => 'user@example.com',
@@ -60,9 +66,12 @@ it('resets password with valid token and revokes all tokens', function (): void 
 });
 
 it('rejects an expired token with 422', function (): void {
+    /** @var TestCase $this */
     $user = $this->createUser();
 
-    $resetToken = Password::broker('users')->createToken($user);
+    /** @var PasswordBroker $broker */
+    $broker = Password::broker('users');
+    $resetToken = $broker->createToken($user);
 
     DB::table('password_reset_tokens')->where('email', $user->email)->update([
         'created_at' => now()->subHours(2),

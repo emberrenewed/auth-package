@@ -6,8 +6,10 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
 use Technobase\AuthKit\Notifications\EmailOtpNotification;
+use Technobase\AuthKit\Tests\TestCase;
 
 it('sends an email otp and stores a hashed code', function (): void {
+    /** @var TestCase $this */
     Notification::fake();
 
     $this->createUser(['email' => 'otp@example.com']);
@@ -28,6 +30,7 @@ it('sends an email otp and stores a hashed code', function (): void {
 });
 
 it('verifies email otp and issues a sanctum token', function (): void {
+    /** @var TestCase $this */
     $this->createUser(['email' => 'verify-otp@example.com']);
 
     DB::table('auth_kit_otps')->insert([
@@ -54,6 +57,7 @@ it('verifies email otp and issues a sanctum token', function (): void {
 });
 
 it('rejects wrong email otp codes', function (): void {
+    /** @var TestCase $this */
     $this->createUser(['email' => 'wrong-otp@example.com']);
 
     DB::table('auth_kit_otps')->insert([
@@ -73,6 +77,7 @@ it('rejects wrong email otp codes', function (): void {
 });
 
 it('rejects expired email otp codes', function (): void {
+    /** @var TestCase $this */
     $this->createUser(['email' => 'expired-otp@example.com']);
 
     DB::table('auth_kit_otps')->insert([

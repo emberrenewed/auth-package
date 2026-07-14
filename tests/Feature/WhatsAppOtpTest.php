@@ -5,8 +5,10 @@ declare(strict_types=1);
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Technobase\AuthKit\Otp\Channels\LogOtpChannel;
+use Technobase\AuthKit\Tests\TestCase;
 
 it('sends a whatsapp otp via the log channel in tests', function (): void {
+    /** @var TestCase $this */
     config()->set('auth-kit.otp.channels.whatsapp', LogOtpChannel::class);
 
     $this->createUser([
@@ -28,6 +30,7 @@ it('sends a whatsapp otp via the log channel in tests', function (): void {
 });
 
 it('verifies whatsapp otp by phone and issues a token', function (): void {
+    /** @var TestCase $this */
     $this->createUser([
         'email' => 'wa-verify@example.com',
         'phone' => '15559876543',
@@ -51,6 +54,7 @@ it('verifies whatsapp otp by phone and issues a token', function (): void {
 });
 
 it('rejects invalid whatsapp otp codes', function (): void {
+    /** @var TestCase $this */
     $this->createUser([
         'email' => 'wa-bad@example.com',
         'phone' => '15550001111',

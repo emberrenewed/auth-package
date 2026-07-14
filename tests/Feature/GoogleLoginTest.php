@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 use Laravel\Socialite\Facades\Socialite;
 use Laravel\Socialite\Two\AbstractProvider;
+use Technobase\AuthKit\Tests\TestCase;
 use Technobase\AuthKit\Tests\TestUser;
 
 it('resolves identity via access_token and issues token', function (): void {
+    /** @var TestCase $this */
     $this->createUser([
         'email' => 'google@example.com',
         'provider' => 'google',
@@ -25,6 +27,7 @@ it('resolves identity via access_token and issues token', function (): void {
 });
 
 it('returns 401 when access_token is invalid', function (): void {
+    /** @var TestCase $this */
     $provider = Mockery::mock(AbstractProvider::class);
     $provider->shouldReceive('stateless')->andReturnSelf();
     $provider->shouldReceive('userFromToken')
@@ -44,6 +47,7 @@ it('returns 401 when access_token is invalid', function (): void {
 });
 
 it('returns 404 when no subject and auto_create is false', function (): void {
+    /** @var TestCase $this */
     config()->set('auth-kit.subjects.api.auto_create_on_social', false);
 
     mockSocialToken('google', 'valid-token', mockSocialUser('missing-123', 'missing@example.com', 'Missing User'));
@@ -61,6 +65,7 @@ it('returns 404 when no subject and auto_create is false', function (): void {
 });
 
 it('creates new user when auto_create_on_social is true', function (): void {
+    /** @var TestCase $this */
     config()->set('auth-kit.subjects.api.auto_create_on_social', true);
 
     mockSocialToken('google', 'valid-token', mockSocialUser('new-456', 'new@example.com', 'New Google'));

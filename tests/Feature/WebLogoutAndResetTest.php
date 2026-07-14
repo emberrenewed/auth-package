@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Illuminate\Auth\Passwords\PasswordBroker;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
@@ -11,6 +12,8 @@ use Laravel\Socialite\Two\AbstractProvider;
 use Laravel\Socialite\Two\User as SocialiteUser;
 use Technobase\AuthKit\Events\LoggedOut;
 use Technobase\AuthKit\Http\Actions\RedirectToProviderAction;
+use Technobase\AuthKit\Tests\TestCase;
+use Technobase\AuthKit\Tests\TestUser;
 
 beforeEach(function (): void {
     Route::get('/home', fn () => 'home')->name('home');
@@ -19,6 +22,7 @@ beforeEach(function (): void {
 });
 
 it('logs out web session and fires LoggedOut', function (): void {
+    /** @var TestCase $this */
     Event::fake([LoggedOut::class]);
 
     $user = $this->createUser();
@@ -30,13 +34,18 @@ it('logs out web session and fires LoggedOut', function (): void {
     $this->assertGuest();
 
     Event::assertDispatched(LoggedOut::class, function (LoggedOut $event) use ($user): bool {
-        return $event->subject->is($user) && $event->flavor === 'web';
+        return $event->subject instanceof TestUser
+            && $event->subject->is($user)
+            && $event->flavor === 'web';
     });
 });
 
 it('resets password on web and flashes status', function (): void {
+    /** @var TestCase $this */
     $user = $this->createUser();
-    $token = Password::broker('users')->createToken($user);
+    /** @var PasswordBroker $broker */
+    $broker = Password::broker('users');
+    $token = $broker->createToken($user);
 
     $this->from('/reset')
         ->post('/auth/reset-password', [
@@ -52,6 +61,7 @@ it('resets password on web and flashes status', function (): void {
 });
 
 it('rejects invalid web reset token with errors', function (): void {
+    /** @var TestCase $this */
     $this->createUser();
 
     $this->from('/reset')
@@ -66,6 +76,7 @@ it('rejects invalid web reset token with errors', function (): void {
 });
 
 it('returns validation errors for failed web password login', function (): void {
+    /** @var TestCase $this */
     $this->createUser();
 
     $this->from('/login')
@@ -86,6 +97,7 @@ it('returns errors when redirect driver is not registered', function (): void {
 });
 
 it('redirects web social users without a subject to registration completion', function (): void {
+    /** @var TestCase $this */
     config()->set('auth-kit.subjects.web.auto_create_on_social', false);
 
     $socialUser = (new SocialiteUser)->map([

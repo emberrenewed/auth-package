@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 use Laravel\Socialite\Facades\Socialite;
 use Laravel\Socialite\Two\AbstractProvider;
+use Technobase\AuthKit\Tests\TestCase;
 
 it('authenticates via facebook access_token', function (): void {
+    /** @var TestCase $this */
     $this->createUser([
         'email' => 'facebook@example.com',
         'provider' => 'facebook',
@@ -22,6 +24,7 @@ it('authenticates via facebook access_token', function (): void {
 });
 
 it('authenticates via github access_token', function (): void {
+    /** @var TestCase $this */
     $this->createUser([
         'email' => 'github@example.com',
         'provider' => 'github',
@@ -38,6 +41,7 @@ it('authenticates via github access_token', function (): void {
 });
 
 it('returns 401 when facebook token is invalid', function (): void {
+    /** @var TestCase $this */
     $provider = Mockery::mock(AbstractProvider::class);
     $provider->shouldReceive('stateless')->andReturnSelf();
     $provider->shouldReceive('userFromToken')

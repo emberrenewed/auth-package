@@ -123,21 +123,62 @@ Publish `config/auth-kit.php` and set:
 | Key | Purpose |
 |-----|---------|
 | `subjects.api` / `subjects.web` | Model, guard, resolver, `auto_create_on_social`, `lookup_columns` |
-| `drivers.api` / `drivers.web` | Enabled drivers |
+| `drivers.api` / `drivers.web` | Enable/disable each driver (`true` / `false`) |
 | `routes.api` / `routes.web` | Prefix + middleware |
 | `throttle` | Login rate limit |
 | `password_reset.broker` | Password broker name |
 | `otp` | Length, TTL, max attempts, channel classes |
 
-Default drivers:
+Default drivers (all on). Turn any provider off with `false`:
 
 ```php
 'drivers' => [
-    'web' => ['password', 'google', 'facebook', 'github'],
-    'api' => ['password', 'google', 'facebook', 'github', 'email_otp', 'whatsapp_otp'],
+    'web' => [
+        'password' => true,
+        'google' => true,
+        'facebook' => true,
+        'github' => true,
+    ],
+    'api' => [
+        'password' => true,
+        'google' => true,
+        'facebook' => true,
+        'github' => true,
+        'email_otp' => true,
+        'whatsapp_otp' => true,
+    ],
 ],
 ```
 
+### Enable only the social providers you need
+
+Package consumers publish the config and flip flags. Example — API with Google only (no Facebook / GitHub):
+
+```php
+'drivers' => [
+    'api' => [
+        'password' => true,
+        'google' => true,
+        'facebook' => false,
+        'github' => false,
+        'email_otp' => false,
+        'whatsapp_otp' => false,
+    ],
+    'web' => [
+        'password' => true,
+        'google' => true,
+        'facebook' => false,
+        'github' => false,
+    ],
+],
+```
+
+Disabled drivers:
+- Are not registered as routes
+- Are rejected at runtime if called
+- Do not appear in `GET /api/auth/providers`
+
+Only fill OAuth env keys for providers you enable.
 ---
 
 ## Social OAuth (Google / Facebook / GitHub)

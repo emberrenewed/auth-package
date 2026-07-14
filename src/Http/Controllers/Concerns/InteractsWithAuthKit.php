@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Technobase\AuthKit\Contracts\AuthDriver;
 use Technobase\AuthKit\Contracts\SubjectResolver;
 use Technobase\AuthKit\Exceptions\DriverNotFoundException;
+use Technobase\AuthKit\Support\AuthKitDrivers;
 use Technobase\AuthKit\Support\DriverRegistry;
 
 trait InteractsWithAuthKit
@@ -19,9 +20,7 @@ trait InteractsWithAuthKit
     {
         app()->instance('auth-kit.flavor', $this->flavor());
 
-        $allowed = config("auth-kit.drivers.{$this->flavor()}", []);
-
-        if (! in_array($name, $allowed, true)) {
+        if (! AuthKitDrivers::isEnabled($this->flavor(), $name)) {
             throw DriverNotFoundException::make($name);
         }
 

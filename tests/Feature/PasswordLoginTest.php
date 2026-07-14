@@ -3,13 +3,16 @@
 declare(strict_types=1);
 
 use Illuminate\Support\Facades\RateLimiter;
+use Technobase\AuthKit\Tests\TestCase;
 
 beforeEach(function (): void {
+    /** @var TestCase $this */
     RateLimiter::clear('auth_kit_login:'.md5('user@example.com|127.0.0.1'));
     RateLimiter::clear('auth_kit_login:'.md5('unknown@example.com|127.0.0.1'));
 });
 
 it('issues sanctum token on correct credentials', function (): void {
+    /** @var TestCase $this */
     $this->createUser();
 
     $response = $this->postJson('/api/auth/login', [
@@ -29,6 +32,7 @@ it('issues sanctum token on correct credentials', function (): void {
 });
 
 it('returns 401 on wrong password without leaking email', function (): void {
+    /** @var TestCase $this */
     $this->createUser();
 
     $response = $this->postJson('/api/auth/login', [
@@ -44,6 +48,7 @@ it('returns 401 on wrong password without leaking email', function (): void {
 });
 
 it('returns identical 401 for unknown email', function (): void {
+    /** @var TestCase $this */
     $this->createUser();
 
     $wrongPassword = $this->postJson('/api/auth/login', [
@@ -65,6 +70,7 @@ it('returns identical 401 for unknown email', function (): void {
 });
 
 it('throttles after max_attempts and returns 401', function (): void {
+    /** @var TestCase $this */
     $this->createUser();
 
     $maxAttempts = (int) config('auth-kit.throttle.max_attempts', 5);
@@ -86,6 +92,7 @@ it('throttles after max_attempts and returns 401', function (): void {
 });
 
 it('clears throttle counter on successful login', function (): void {
+    /** @var TestCase $this */
     $this->createUser();
 
     $maxAttempts = (int) config('auth-kit.throttle.max_attempts', 5);
@@ -117,6 +124,7 @@ it('clears throttle counter on successful login', function (): void {
 });
 
 it('blocks a banned subject with 403', function (): void {
+    /** @var TestCase $this */
     $this->createUser([
         'banned_at' => now(),
     ]);
