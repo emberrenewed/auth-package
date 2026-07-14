@@ -8,7 +8,7 @@ use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use RuntimeException;
-use Technobase\AuthKit\Contracts\CredentialIssuer;
+use Technobase\AuthKit\Contracts\Credentials\CredentialIssuer;
 use Technobase\AuthKit\Http\Resources\AuthResource;
 
 final class SanctumCredentialIssuer implements CredentialIssuer

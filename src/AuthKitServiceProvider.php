@@ -6,14 +6,14 @@ namespace Technobase\AuthKit;
 
 use Illuminate\Support\ServiceProvider;
 use Technobase\AuthKit\Console\InstallCommand;
-use Technobase\AuthKit\Drivers\EmailOtpDriver;
-use Technobase\AuthKit\Drivers\FacebookDriver;
-use Technobase\AuthKit\Drivers\GithubDriver;
-use Technobase\AuthKit\Drivers\GoogleDriver;
-use Technobase\AuthKit\Drivers\PasswordDriver;
-use Technobase\AuthKit\Drivers\WhatsAppOtpDriver;
+use Technobase\AuthKit\Drivers\Otp\EmailOtpDriver;
+use Technobase\AuthKit\Drivers\Social\FacebookDriver;
+use Technobase\AuthKit\Drivers\Social\GithubDriver;
+use Technobase\AuthKit\Drivers\Social\GoogleDriver;
+use Technobase\AuthKit\Drivers\Password\PasswordDriver;
+use Technobase\AuthKit\Drivers\Otp\WhatsAppOtpDriver;
 use Technobase\AuthKit\Otp\OtpManager;
-use Technobase\AuthKit\Support\DriverRegistry;
+use Technobase\AuthKit\Support\Registry\DriverRegistry;
 
 final class AuthKitServiceProvider extends ServiceProvider
 {

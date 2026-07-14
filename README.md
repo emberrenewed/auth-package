@@ -248,7 +248,7 @@ Users are resolved by `phone` / `provider`+`provider_id`. In `local`/`testing`, 
 - `LoggedOut`
 
 ```php
-use Technobase\AuthKit\Events\LoginSucceeded;
+use Technobase\AuthKit\Events\Auth\LoginSucceeded;
 
 Event::listen(LoginSucceeded::class, function (LoginSucceeded $event): void {
     //

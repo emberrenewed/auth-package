@@ -8,12 +8,12 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Symfony\Component\HttpFoundation\Response as HttpResponse;
-use Technobase\AuthKit\Http\Actions\AuthenticateAction;
-use Technobase\AuthKit\Http\Actions\ForgotPasswordAction;
-use Technobase\AuthKit\Http\Actions\ListProvidersAction;
-use Technobase\AuthKit\Http\Actions\LogoutAction;
-use Technobase\AuthKit\Http\Actions\ResetPasswordAction;
-use Technobase\AuthKit\Http\Actions\SendOtpAction;
+use Technobase\AuthKit\Http\Actions\Auth\AuthenticateAction;
+use Technobase\AuthKit\Http\Actions\Password\ForgotPasswordAction;
+use Technobase\AuthKit\Http\Actions\Auth\ListProvidersAction;
+use Technobase\AuthKit\Http\Actions\Auth\LogoutAction;
+use Technobase\AuthKit\Http\Actions\Password\ResetPasswordAction;
+use Technobase\AuthKit\Http\Actions\Otp\SendOtpAction;
 use Technobase\AuthKit\Http\Requests\ForgotPasswordRequest;
 use Technobase\AuthKit\Http\Requests\ResetPasswordRequest;
 

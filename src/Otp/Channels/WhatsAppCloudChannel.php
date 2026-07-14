@@ -6,7 +6,7 @@ namespace Technobase\AuthKit\Otp\Channels;
 
 use Illuminate\Support\Facades\Http;
 use RuntimeException;
-use Technobase\AuthKit\Contracts\OtpChannel;
+use Technobase\AuthKit\Contracts\Otp\OtpChannel;
 
 final class WhatsAppCloudChannel implements OtpChannel
 {

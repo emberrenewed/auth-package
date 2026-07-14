@@ -6,11 +6,11 @@ use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Foundation\Auth\User as AuthenticatableUser;
 use Illuminate\Http\Request;
 use Laravel\Socialite\Facades\Socialite;
-use Technobase\AuthKit\Drivers\GoogleDriver;
-use Technobase\AuthKit\Drivers\PasswordDriver;
+use Technobase\AuthKit\Drivers\Social\GoogleDriver;
+use Technobase\AuthKit\Drivers\Password\PasswordDriver;
 use Technobase\AuthKit\Exceptions\InvalidCredentialsException;
 use Technobase\AuthKit\Http\CredentialIssuers\SanctumCredentialIssuer;
-use Technobase\AuthKit\Support\DriverRegistry;
+use Technobase\AuthKit\Support\Registry\DriverRegistry;
 use Technobase\AuthKit\Tests\TestCase;
 
 it('validates empty payload for web google driver', function (): void {

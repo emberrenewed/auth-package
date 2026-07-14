@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use Technobase\AuthKit\Otp\Channels\MailOtpChannel;
 use Technobase\AuthKit\Otp\Channels\WhatsAppCloudChannel;
-use Technobase\AuthKit\Support\EloquentSubjectResolver;
+use Technobase\AuthKit\Support\Subjects\EloquentSubjectResolver;
 
 return [
     'subjects' => [

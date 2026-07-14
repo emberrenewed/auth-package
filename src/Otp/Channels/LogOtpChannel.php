@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Technobase\AuthKit\Otp\Channels;
 
 use Illuminate\Support\Facades\Log;
-use Technobase\AuthKit\Contracts\OtpChannel;
+use Technobase\AuthKit\Contracts\Otp\OtpChannel;
 
 final class LogOtpChannel implements OtpChannel
 {

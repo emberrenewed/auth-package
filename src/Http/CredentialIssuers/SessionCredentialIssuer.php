@@ -8,7 +8,7 @@ use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Technobase\AuthKit\Contracts\CredentialIssuer;
+use Technobase\AuthKit\Contracts\Credentials\CredentialIssuer;
 
 final class SessionCredentialIssuer implements CredentialIssuer
 {

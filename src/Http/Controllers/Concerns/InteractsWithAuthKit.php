@@ -6,11 +6,11 @@ namespace Technobase\AuthKit\Http\Controllers\Concerns;
 
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Model;
-use Technobase\AuthKit\Contracts\AuthDriver;
-use Technobase\AuthKit\Contracts\SubjectResolver;
+use Technobase\AuthKit\Contracts\Drivers\AuthDriver;
+use Technobase\AuthKit\Contracts\Subjects\SubjectResolver;
 use Technobase\AuthKit\Exceptions\DriverNotFoundException;
-use Technobase\AuthKit\Support\AuthKitDrivers;
-use Technobase\AuthKit\Support\DriverRegistry;
+use Technobase\AuthKit\Support\Registry\AuthKitDrivers;
+use Technobase\AuthKit\Support\Registry\DriverRegistry;
 
 trait InteractsWithAuthKit
 {

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Technobase\AuthKit\Otp\Channels;
 
 use Illuminate\Support\Facades\Notification as NotificationFacade;
-use Technobase\AuthKit\Contracts\OtpChannel;
+use Technobase\AuthKit\Contracts\Otp\OtpChannel;
 use Technobase\AuthKit\Notifications\EmailOtpNotification;
 
 final class MailOtpChannel implements OtpChannel

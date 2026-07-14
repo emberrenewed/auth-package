@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Technobase\AuthKit\Facades;
 
 use Illuminate\Support\Facades\Facade;
-use Technobase\AuthKit\Support\DriverRegistry;
+use Technobase\AuthKit\Support\Registry\DriverRegistry;
 
 final class AuthKit extends Facade
 {

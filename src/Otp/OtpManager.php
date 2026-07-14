@@ -7,7 +7,7 @@ namespace Technobase\AuthKit\Otp;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Technobase\AuthKit\Contracts\OtpChannel;
+use Technobase\AuthKit\Contracts\Otp\OtpChannel;
 use Technobase\AuthKit\Exceptions\InvalidCredentialsException;
 
 final class OtpManager

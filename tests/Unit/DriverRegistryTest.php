@@ -3,11 +3,11 @@
 declare(strict_types=1);
 
 use Illuminate\Http\Request;
-use Technobase\AuthKit\Contracts\AuthDriver;
-use Technobase\AuthKit\Drivers\PasswordDriver;
+use Technobase\AuthKit\Contracts\Drivers\AuthDriver;
+use Technobase\AuthKit\Drivers\Password\PasswordDriver;
 use Technobase\AuthKit\Exceptions\DriverNotFoundException;
-use Technobase\AuthKit\Support\DriverRegistry;
-use Technobase\AuthKit\Support\NormalizedIdentity;
+use Technobase\AuthKit\Support\Registry\DriverRegistry;
+use Technobase\AuthKit\Support\Identity\NormalizedIdentity;
 
 it('resolves a built-in driver by name', function (): void {
     $registry = app(DriverRegistry::class);

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use Illuminate\Support\Facades\Route;
 use Technobase\AuthKit\Http\Controllers\Api\AuthController;
-use Technobase\AuthKit\Support\AuthKitDrivers;
+use Technobase\AuthKit\Support\Registry\AuthKitDrivers;
 
 $api = (array) config('auth-kit.routes.api', []);
 $drivers = AuthKitDrivers::enabled('api');

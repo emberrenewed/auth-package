@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use Illuminate\Support\Facades\Route;
 use Technobase\AuthKit\Http\Controllers\Web\AuthController;
-use Technobase\AuthKit\Support\AuthKitDrivers;
+use Technobase\AuthKit\Support\Registry\AuthKitDrivers;
 
 $web = (array) config('auth-kit.routes.web', []);
 $drivers = AuthKitDrivers::enabled('web');
