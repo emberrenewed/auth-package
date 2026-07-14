@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "TechnoBase Laravel Auth Kit",
-    "description": "Test Auth Kit API.\n\nORDER:\n1) Providers\n2) Login → saves {{token}} (Sanctum) for Logout\n3) Wrong password\n4) Logout (uses Bearer {{token}})\n5) Forgot password\n6) Get reset token (demo helper) → saves {{reset_token}}\n7) Reset password (uses {{reset_token}} NOT login token)\n8) Login with new password\n9–11) Social (google/facebook/github) with access_token vars\n12–15) Email / WhatsApp OTP send + verify\n\nbase_url = http://127.0.0.1:8000\nRun: cd demo-app && php artisan serve --host=127.0.0.1 --port=8000",
+    "description": "Test Auth Kit API.\n\nFolders:\n1) Providers — list enabled drivers\n2) Password — login → logout → forgot/reset → login again\n3) Social — Google / Facebook / GitHub (set *_access_token vars)\n4) OTP — Email / WhatsApp send + verify\n\nbase_url = http://127.0.0.1:8000\nRun: php artisan serve --host=127.0.0.1 --port=8000",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
@@ -19,357 +19,380 @@
   ],
   "item": [
     {
-      "name": "1. Providers",
-      "event": [
+      "name": "Providers",
+      "item": [
         {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test('Status 200', () => pm.response.to.have.status(200));",
-              "pm.test('Has drivers', () => pm.expect(pm.response.json().data).to.be.an('array'));"
-            ]
+          "name": "List providers",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Has drivers', () => pm.expect(pm.response.json().data).to.be.an('array'));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": "{{base_url}}/api/auth/providers"
           }
         }
-      ],
-      "request": {
-        "method": "GET",
-        "header": [{ "key": "Accept", "value": "application/json" }],
-        "url": "{{base_url}}/api/auth/providers"
-      }
+      ]
     },
     {
-      "name": "2. Login (password)",
-      "event": [
+      "name": "Password",
+      "description": "Order: Login → (optional Wrong password) → Logout → Forgot → Get reset token → Reset → Login with new password",
+      "item": [
         {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test('Status 200', () => pm.response.to.have.status(200));",
-              "const json = pm.response.json();",
-              "pm.test('Has Sanctum token', () => pm.expect(json.token).to.be.a('string'));",
-              "if (json.token) {",
-              "  pm.collectionVariables.set('token', json.token);",
-              "  console.log('Saved login token (for Logout Bearer only):', json.token);",
-              "}"
-            ]
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Has Sanctum token', () => pm.expect(json.token).to.be.a('string'));",
+                  "if (json.token) {",
+                  "  pm.collectionVariables.set('token', json.token);",
+                  "  console.log('Saved login token (for Logout Bearer only):', json.token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}"
+            },
+            "url": "{{base_url}}/api/auth/login",
+            "description": "Saves Sanctum token into {{token}}. Use ONLY as Bearer for Logout."
+          }
+        },
+        {
+          "name": "Login (wrong password → 401)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 401', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"wrong-password\"\n}"
+            },
+            "url": "{{base_url}}/api/auth/login"
+          }
+        },
+        {
+          "name": "Logout",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "const t = pm.collectionVariables.get('token');",
+                  "if (!t) {",
+                  "  throw new Error('Run Password → Login first — {{token}} is empty.');",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
+            },
+            "method": "POST",
+            "header": [{ "key": "Accept", "value": "application/json" }],
+            "url": "{{base_url}}/api/auth/logout",
+            "description": "Uses Authorization Bearer {{token}} from Login. Do NOT put this token in Reset password body."
+          }
+        },
+        {
+          "name": "Forgot password",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{email}}\"\n}"
+            },
+            "url": "{{base_url}}/api/auth/forgot-password",
+            "description": "Always 200. Does not return the reset token (security). Next: Get reset token."
+          }
+        },
+        {
+          "name": "Get reset token (demo helper)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('Has reset_token', () => pm.expect(json.reset_token).to.be.a('string'));",
+                  "if (json.reset_token) {",
+                  "  pm.collectionVariables.set('reset_token', json.reset_token);",
+                  "  console.log('Saved reset_token for Reset password:', json.reset_token);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{email}}\"\n}"
+            },
+            "url": "{{base_url}}/api/debug/reset-token",
+            "description": "DEMO ONLY (local). Returns password-reset token and saves {{reset_token}}. This is NOT the login Bearer token."
+          }
+        },
+        {
+          "name": "Reset password",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "const rt = pm.collectionVariables.get('reset_token') || '';",
+                  "if (!rt) {",
+                  "  throw new Error('Run Get reset token first.');",
+                  "}",
+                  "if (rt.includes('|')) {",
+                  "  throw new Error('Wrong token: looks like Sanctum login token (has |). Run Get reset token, do NOT use Login token.');",
+                  "}"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "if (pm.response.code === 200) {",
+                  "  pm.collectionVariables.set('password', pm.collectionVariables.get('new_password'));",
+                  "  pm.collectionVariables.set('token', '');",
+                  "  console.log('Password updated. Collection password is now new_password. Login again.');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{email}}\",\n  \"token\": \"{{reset_token}}\",\n  \"password\": \"{{new_password}}\",\n  \"password_confirmation\": \"{{new_password}}\"\n}"
+            },
+            "url": "{{base_url}}/api/auth/reset-password",
+            "description": "Uses {{reset_token}} from Get reset token. Never paste Login Bearer token here."
+          }
+        },
+        {
+          "name": "Login with new password",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "if (json.token) pm.collectionVariables.set('token', json.token);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}"
+            },
+            "url": "{{base_url}}/api/auth/login",
+            "description": "After reset, {{password}} is updated to {{new_password}} by the Reset test script."
           }
         }
-      ],
-      "request": {
-        "method": "POST",
-        "header": [
-          { "key": "Accept", "value": "application/json" },
-          { "key": "Content-Type", "value": "application/json" }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}"
-        },
-        "url": "{{base_url}}/api/auth/login",
-        "description": "Saves Sanctum token into {{token}}. Use ONLY as Bearer for Logout."
-      }
+      ]
     },
     {
-      "name": "3. Login (wrong password → 401)",
-      "event": [
+      "name": "Social",
+      "description": "Set google_access_token / facebook_access_token / github_access_token in collection variables.",
+      "item": [
         {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test('Status 401', () => pm.response.to.have.status(401));"
-            ]
+          "name": "Google",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"access_token\": \"{{google_access_token}}\"\n}"
+            },
+            "url": "{{base_url}}/api/auth/google",
+            "description": "Set {{google_access_token}} from Google Sign-In / OAuth client."
+          }
+        },
+        {
+          "name": "Facebook",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"access_token\": \"{{facebook_access_token}}\"\n}"
+            },
+            "url": "{{base_url}}/api/auth/facebook",
+            "description": "Set {{facebook_access_token}} from Facebook Login."
+          }
+        },
+        {
+          "name": "GitHub",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"access_token\": \"{{github_access_token}}\"\n}"
+            },
+            "url": "{{base_url}}/api/auth/github",
+            "description": "Set {{github_access_token}} from GitHub OAuth or a PAT (read:user, user:email)."
           }
         }
-      ],
-      "request": {
-        "method": "POST",
-        "header": [
-          { "key": "Accept", "value": "application/json" },
-          { "key": "Content-Type", "value": "application/json" }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"wrong-password\"\n}"
-        },
-        "url": "{{base_url}}/api/auth/login"
-      }
+      ]
     },
     {
-      "name": "4. Logout (Bearer login token)",
-      "event": [
+      "name": "OTP",
+      "description": "Send OTP, then set {{otp_code}} and verify.",
+      "item": [
         {
-          "listen": "prerequest",
-          "script": {
-            "exec": [
-              "const t = pm.collectionVariables.get('token');",
-              "if (!t) {",
-              "  throw new Error('Run request 2. Login first — {{token}} is empty.');",
-              "}"
-            ]
+          "name": "Email OTP send",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{email}}\"\n}"
+            },
+            "url": "{{base_url}}/api/auth/otp/email/send",
+            "description": "Sends a 6-digit code. Check mail / log, then set {{otp_code}}."
           }
         },
         {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test('Status 200', () => pm.response.to.have.status(200));"
-            ]
+          "name": "Email OTP verify",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{email}}\",\n  \"code\": \"{{otp_code}}\"\n}"
+            },
+            "url": "{{base_url}}/api/auth/otp/email/verify",
+            "description": "Issues Sanctum token on success."
           }
-        }
-      ],
-      "request": {
-        "auth": {
-          "type": "bearer",
-          "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
         },
-        "method": "POST",
-        "header": [{ "key": "Accept", "value": "application/json" }],
-        "url": "{{base_url}}/api/auth/logout",
-        "description": "Uses Authorization Bearer {{token}} from Login. Do NOT put this token in Reset password body."
-      }
-    },
-    {
-      "name": "5. Forgot password",
-      "event": [
         {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test('Status 200', () => pm.response.to.have.status(200));"
-            ]
+          "name": "WhatsApp OTP send",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"{{phone}}\"\n}"
+            },
+            "url": "{{base_url}}/api/auth/otp/whatsapp/send",
+            "description": "Requires user with matching phone (digits) when auto_create is false. Local/testing logs the code if WhatsApp env is empty."
           }
-        }
-      ],
-      "request": {
-        "method": "POST",
-        "header": [
-          { "key": "Accept", "value": "application/json" },
-          { "key": "Content-Type", "value": "application/json" }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"email\": \"{{email}}\"\n}"
         },
-        "url": "{{base_url}}/api/auth/forgot-password",
-        "description": "Always 200. Does not return the reset token (security). Next: run 6. Get reset token."
-      }
-    },
-    {
-      "name": "6. Get reset token (demo helper)",
-      "event": [
         {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test('Status 200', () => pm.response.to.have.status(200));",
-              "const json = pm.response.json();",
-              "pm.test('Has reset_token', () => pm.expect(json.reset_token).to.be.a('string'));",
-              "if (json.reset_token) {",
-              "  pm.collectionVariables.set('reset_token', json.reset_token);",
-              "  console.log('Saved reset_token for Reset password:', json.reset_token);",
-              "}"
-            ]
+          "name": "WhatsApp OTP verify",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"phone\": \"{{phone}}\",\n  \"code\": \"{{otp_code}}\"\n}"
+            },
+            "url": "{{base_url}}/api/auth/otp/whatsapp/verify",
+            "description": "Issues Sanctum token on success."
           }
         }
-      ],
-      "request": {
-        "method": "POST",
-        "header": [
-          { "key": "Accept", "value": "application/json" },
-          { "key": "Content-Type", "value": "application/json" }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"email\": \"{{email}}\"\n}"
-        },
-        "url": "{{base_url}}/api/debug/reset-token",
-        "description": "DEMO ONLY (local). Returns password-reset token and saves {{reset_token}}. This is NOT the login Bearer token."
-      }
-    },
-    {
-      "name": "7. Reset password",
-      "event": [
-        {
-          "listen": "prerequest",
-          "script": {
-            "exec": [
-              "const rt = pm.collectionVariables.get('reset_token') || '';",
-              "if (!rt) {",
-              "  throw new Error('Run 6. Get reset token first.');",
-              "}",
-              "if (rt.includes('|')) {",
-              "  throw new Error('Wrong token: looks like Sanctum login token (has |). Run 6. Get reset token, do NOT use Login token.');",
-              "}"
-            ]
-          }
-        },
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test('Status 200', () => pm.response.to.have.status(200));",
-              "if (pm.response.code === 200) {",
-              "  pm.collectionVariables.set('password', pm.collectionVariables.get('new_password'));",
-              "  pm.collectionVariables.set('token', '');",
-              "  console.log('Password updated. Collection password is now new_password. Login again.');",
-              "}"
-            ]
-          }
-        }
-      ],
-      "request": {
-        "method": "POST",
-        "header": [
-          { "key": "Accept", "value": "application/json" },
-          { "key": "Content-Type", "value": "application/json" }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"email\": \"{{email}}\",\n  \"token\": \"{{reset_token}}\",\n  \"password\": \"{{new_password}}\",\n  \"password_confirmation\": \"{{new_password}}\"\n}"
-        },
-        "url": "{{base_url}}/api/auth/reset-password",
-        "description": "Uses {{reset_token}} from request 6. Never paste Login Bearer token here."
-      }
-    },
-    {
-      "name": "8. Login with new password",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "exec": [
-              "pm.test('Status 200', () => pm.response.to.have.status(200));",
-              "const json = pm.response.json();",
-              "if (json.token) pm.collectionVariables.set('token', json.token);"
-            ]
-          }
-        }
-      ],
-      "request": {
-        "method": "POST",
-        "header": [
-          { "key": "Accept", "value": "application/json" },
-          { "key": "Content-Type", "value": "application/json" }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}"
-        },
-        "url": "{{base_url}}/api/auth/login",
-        "description": "After reset, {{password}} is updated to {{new_password}} by the Reset test script."
-      }
-    },
-    {
-      "name": "9. Google (access_token)",
-      "request": {
-        "method": "POST",
-        "header": [
-          { "key": "Accept", "value": "application/json" },
-          { "key": "Content-Type", "value": "application/json" }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"access_token\": \"{{google_access_token}}\"\n}"
-        },
-        "url": "{{base_url}}/api/auth/google",
-        "description": "Set {{google_access_token}} from Google Sign-In / OAuth client."
-      }
-    },
-    {
-      "name": "10. Facebook (access_token)",
-      "request": {
-        "method": "POST",
-        "header": [
-          { "key": "Accept", "value": "application/json" },
-          { "key": "Content-Type", "value": "application/json" }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"access_token\": \"{{facebook_access_token}}\"\n}"
-        },
-        "url": "{{base_url}}/api/auth/facebook",
-        "description": "Set {{facebook_access_token}} from Facebook Login."
-      }
-    },
-    {
-      "name": "11. GitHub (access_token)",
-      "request": {
-        "method": "POST",
-        "header": [
-          { "key": "Accept", "value": "application/json" },
-          { "key": "Content-Type", "value": "application/json" }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"access_token\": \"{{github_access_token}}\"\n}"
-        },
-        "url": "{{base_url}}/api/auth/github",
-        "description": "Set {{github_access_token}} from GitHub OAuth."
-      }
-    },
-    {
-      "name": "12. Email OTP send",
-      "request": {
-        "method": "POST",
-        "header": [
-          { "key": "Accept", "value": "application/json" },
-          { "key": "Content-Type", "value": "application/json" }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"email\": \"{{email}}\"\n}"
-        },
-        "url": "{{base_url}}/api/auth/otp/email/send",
-        "description": "Sends a 6-digit code. Check mail / log, then set {{otp_code}}."
-      }
-    },
-    {
-      "name": "13. Email OTP verify",
-      "request": {
-        "method": "POST",
-        "header": [
-          { "key": "Accept", "value": "application/json" },
-          { "key": "Content-Type", "value": "application/json" }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"email\": \"{{email}}\",\n  \"code\": \"{{otp_code}}\"\n}"
-        },
-        "url": "{{base_url}}/api/auth/otp/email/verify",
-        "description": "Issues Sanctum token on success."
-      }
-    },
-    {
-      "name": "14. WhatsApp OTP send",
-      "request": {
-        "method": "POST",
-        "header": [
-          { "key": "Accept", "value": "application/json" },
-          { "key": "Content-Type", "value": "application/json" }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"phone\": \"{{phone}}\"\n}"
-        },
-        "url": "{{base_url}}/api/auth/otp/whatsapp/send",
-        "description": "Requires user with matching phone (digits) when auto_create is false. Local/testing logs the code if WhatsApp env is empty."
-      }
-    },
-    {
-      "name": "15. WhatsApp OTP verify",
-      "request": {
-        "method": "POST",
-        "header": [
-          { "key": "Accept", "value": "application/json" },
-          { "key": "Content-Type", "value": "application/json" }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"phone\": \"{{phone}}\",\n  \"code\": \"{{otp_code}}\"\n}"
-        },
-        "url": "{{base_url}}/api/auth/otp/whatsapp/verify",
-        "description": "Issues Sanctum token on success."
-      }
+      ]
     }
   ]
 }
