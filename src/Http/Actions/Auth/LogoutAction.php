@@ -34,8 +34,8 @@ final class LogoutAction
             return redirect('/')->with('status', 'You have been logged out successfully.');
         }
 
-        if (is_callable([$subject, 'currentAccessToken'])) {
-            $accessToken = $subject->currentAccessToken();
+        if ($subject !== null && is_callable([$subject, 'currentAccessToken'])) {
+            $accessToken = call_user_func([$subject, 'currentAccessToken']);
 
             if ($accessToken instanceof Model) {
                 $accessToken->delete();
