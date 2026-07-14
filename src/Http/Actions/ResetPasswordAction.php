@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Technobase\AuthKit\Http\Callbacks;
+namespace Technobase\AuthKit\Http\Actions;
 
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Technobase\AuthKit\Http\Requests\ResetPasswordRequest;
 
-final class ResetPasswordCallback
+final class ResetPasswordAction
 {
     public function __invoke(ResetPasswordRequest $request, string $flavor = 'api'): JsonResponse|RedirectResponse
     {

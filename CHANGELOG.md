@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Renamed `Http/Callbacks` to `Http/Actions` with `*Action` class names (`AuthenticateAction`, `LogoutAction`, `SendOtpAction`, `ForgotPasswordAction`, `ResetPasswordAction`, `ListProvidersAction`, `RedirectToProviderAction`); AuthControllers still inject and invoke them
+
 ### Added
 
 - Multi-driver authentication via `AuthDriver` contract and `DriverRegistry`
@@ -14,7 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Built-in `google` driver (API access-token + web OAuth callback) verifying tokens with Google/Socialite
 - Configurable subject resolvers (`EloquentSubjectResolver`) with social linking and optional auto-create
 - Sanctum API credential issuer and session web credential issuer
-- Thin API/Web controllers backed by invokable callbacks for login, logout, password reset, redirect, and providers
+- Thin API/Web controllers backed by invokable HTTP actions for login, logout, password reset, redirect, and providers
 - Route registration gated by `auth-kit.drivers.*` and `auth-kit.routes.*` config
 - Password forgot/reset flows that never reveal email existence; reset revokes all Sanctum tokens
 - Domain events: `LoginAttempted`, `LoginSucceeded`, `LoginFailed`, `SocialUserResolved`, `LoggedOut`

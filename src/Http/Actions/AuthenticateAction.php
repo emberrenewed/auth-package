@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Technobase\AuthKit\Http\Callbacks;
+namespace Technobase\AuthKit\Http\Actions;
 
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Http\Request;
@@ -17,7 +17,7 @@ use Technobase\AuthKit\Http\Controllers\Concerns\InteractsWithAuthKit;
 use Technobase\AuthKit\Http\CredentialIssuers\SanctumCredentialIssuer;
 use Technobase\AuthKit\Http\CredentialIssuers\SessionCredentialIssuer;
 
-final class AuthenticateCallback
+final class AuthenticateAction
 {
     use InteractsWithAuthKit;
 

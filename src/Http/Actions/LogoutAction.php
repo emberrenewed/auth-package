@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Technobase\AuthKit\Http\Callbacks;
+namespace Technobase\AuthKit\Http\Actions;
 
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Model;
@@ -12,7 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Technobase\AuthKit\Events\LoggedOut;
 
-final class LogoutCallback
+final class LogoutAction
 {
     public function __invoke(Request $request, string $flavor = 'api'): JsonResponse|RedirectResponse
     {

@@ -10,7 +10,7 @@ use Laravel\Socialite\Facades\Socialite;
 use Laravel\Socialite\Two\AbstractProvider;
 use Laravel\Socialite\Two\User as SocialiteUser;
 use Technobase\AuthKit\Events\LoggedOut;
-use Technobase\AuthKit\Http\Callbacks\RedirectCallback;
+use Technobase\AuthKit\Http\Actions\RedirectToProviderAction;
 
 beforeEach(function (): void {
     Route::get('/home', fn () => 'home')->name('home');
@@ -80,7 +80,7 @@ it('returns validation errors for failed web password login', function (): void 
 it('returns errors when redirect driver is not registered', function (): void {
     config()->set('auth-kit.drivers.web', ['password', 'apple']);
 
-    $response = app(RedirectCallback::class)('apple');
+    $response = app(RedirectToProviderAction::class)('apple');
 
     expect($response->isRedirect())->toBeTrue();
 });

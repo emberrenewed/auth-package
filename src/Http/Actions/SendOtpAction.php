@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Technobase\AuthKit\Http\Callbacks;
+namespace Technobase\AuthKit\Http\Actions;
 
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Technobase\AuthKit\Otp\OtpManager;
 
-final class SendOtpCallback
+final class SendOtpAction
 {
     public function __construct(
         private readonly OtpManager $otp,

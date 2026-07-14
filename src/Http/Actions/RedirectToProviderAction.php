@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Technobase\AuthKit\Http\Callbacks;
+namespace Technobase\AuthKit\Http\Actions;
 
 use Illuminate\Http\RedirectResponse;
 use Laravel\Socialite\Facades\Socialite;
 use Technobase\AuthKit\Exceptions\DriverNotFoundException;
 use Technobase\AuthKit\Http\Controllers\Concerns\InteractsWithAuthKit;
 
-final class RedirectCallback
+final class RedirectToProviderAction
 {
     use InteractsWithAuthKit;
 

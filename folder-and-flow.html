@@ -436,7 +436,7 @@
     ├── <span class="d">Facades/</span>            <span class="c"># AuthKit:: facade</span>
     ├── <span class="d">Http/</span>
     │   ├── <span class="d">Controllers/</span>    <span class="c"># thin entry (Api / Web)</span>
-    │   ├── <span class="d">Callbacks/</span>      <span class="c"># real work of each action</span>
+    │   ├── <span class="d">Actions/</span>        <span class="c"># real work of each action</span>
     │   ├── <span class="d">Requests/</span>       <span class="c"># validation rules</span>
     │   ├── <span class="d">CredentialIssuers/</span> <span class="c"># session vs Sanctum token</span>
     │   └── <span class="d">Resources/</span>      <span class="c"># JSON shape of user</span>
@@ -495,8 +495,8 @@
           <div class="why-item">
             <span class="label flow">Why use</span>
             <div class="pair">
-              <p class="en">So you can add WhatsApp OTP or a new social login without rewriting AuthenticateCallback — just a new Driver that obeys the same AuthDriver contract.</p>
-              <p class="ckb" dir="rtl">بۆ ئەوەی OTPـی نوێ یان loginـی کۆمەڵایەتی نوێ زیاد بکەیت بەبێ گۆڕینی AuthenticateCallback — تەنھا Driverـێکی نوێ کە ھەمان گرێبەستی AuthDriver جێبەجێ دەکات.</p>
+              <p class="en">So you can add WhatsApp OTP or a new social login without rewriting the AuthenticateAction — just a new Driver that obeys the same AuthDriver contract.</p>
+              <p class="ckb" dir="rtl">بۆ ئەوەی OTPـی نوێ یان loginـی کۆمەڵایەتی نوێ زیاد بکەیت بەبێ گۆڕینی AuthenticateAction — تەنھا Driverـێکی نوێ کە ھەمان گرێبەستی AuthDriver جێبەجێ دەکات.</p>
             </div>
           </div>
         </div>
@@ -551,8 +551,8 @@
           <div class="why-item">
             <span class="label purpose">Purpose</span>
             <div class="pair">
-              <p class="en">Thin doors. Routes call controller methods. Controllers almost immediately hand work to Callbacks. Api returns JSON/token; Web returns redirects/session.</p>
-              <p class="ckb" dir="rtl">دەرگایەکی تەنک. ڕوتەکان کۆنترۆڵەر بانگ دەکەن. کۆنترۆڵەر خێرا کار دەدات بە Callback. Api JSON/توکن دەگەڕێنێتەوە؛ Web ڕیدایرێکت/سێشن.</p>
+              <p class="en">Thin doors. Routes call controller methods. Controllers almost immediately hand work to Actions. Api returns JSON/token; Web returns redirects/session.</p>
+              <p class="ckb" dir="rtl">دەرگایەکی تەنک. ڕوتەکان کۆنترۆڵەر بانگ دەکەن. کۆنترۆڵەر خێرا کار دەدات بە Action. Api JSON/توکن دەگەڕێنێتەوە؛ Web ڕیدایرێکت/سێشن.</p>
             </div>
           </div>
           <div class="why-item">
@@ -565,22 +565,22 @@
         </div>
       </article>
 
-      <!-- Callbacks -->
+      <!-- Actions -->
       <article class="card">
-        <h3><span class="path">src/Http/Callbacks/</span></h3>
+        <h3><span class="path">src/Http/Actions/</span></h3>
         <div class="why">
           <div class="why-item">
             <span class="label purpose">Purpose</span>
             <div class="pair">
-              <p class="en">Where the real action lives: <code>AuthenticateCallback</code>, <code>LogoutCallback</code>, <code>SendOtpCallback</code>, password reset, redirect to Google, etc. Invokable classes (<code>__invoke</code>).</p>
-              <p class="ckb" dir="rtl">شوێنی کرداری ڕاستەقینە: چوونەژوورەوە، دەرچوون، ناردنی OTP، ڕیسێتی وشەی نهێنی… کلاسە Invokableـەکان.</p>
+              <p class="en">Where the real work lives: <code>AuthenticateAction</code>, <code>LogoutAction</code>, <code>SendOtpAction</code>, <code>ForgotPasswordAction</code>, <code>ResetPasswordAction</code>, <code>ListProvidersAction</code>, <code>RedirectToProviderAction</code>. Invokable classes (<code>__invoke</code>) called from AuthController.</p>
+              <p class="ckb" dir="rtl">شوێنی کرداری ڕاستەقینە: Authenticate، Logout، SendOtp… کلاسە Invokableـەکان کە AuthController بانگیان دەکات.</p>
             </div>
           </div>
           <div class="why-item">
             <span class="label why-name">Why name</span>
             <div class="pair">
-              <p class="en"><strong>Callback</strong> = “call me back to do this job.” The controller calls the callback; the callback runs the full business steps.</p>
-              <p class="ckb" dir="rtl"><strong>Callback</strong> واتە «پێمەوە بگەڕێوە بۆ ئەم کارە.» کۆنترۆڵەر callback بانگ دەکات؛ callback ھەنگاوەکانی بزنس جێبەجێ دەکات.</p>
+              <p class="en"><strong>Action</strong> = one clear job. Laravel pattern: thin controller → action class does the work.</p>
+              <p class="ckb" dir="rtl"><strong>Action</strong> واتە یەک کارێکی دیاریکراو. شێوازی Laravel: کۆنترۆڵەری تەنک → کلاسە Action کارەکە دەکات.</p>
             </div>
           </div>
         </div>
@@ -740,8 +740,8 @@
               <span class="ckb" dir="rtl">کۆنترۆڵەر دەرگا دەکاتەوە</span>
             </strong>
             <div class="pair">
-              <p class="en"><span class="folder-chip">Http/Controllers/Api/AuthController</span> method <code>login()</code> — thin. It calls <code>AuthenticateCallback</code>.</p>
-              <p class="ckb" dir="rtl">مێتۆدی login تەنکە؛ راستەوخۆ AuthenticateCallback بانگ دەکات.</p>
+              <p class="en"><span class="folder-chip">Http/Controllers/Api/AuthController</span> method <code>login()</code> — thin. It calls the <code>AuthenticateAction</code> action.</p>
+              <p class="ckb" dir="rtl">مێتۆدی login تەنکە؛ راستەوخۆ AuthenticateAction بانگ دەکات.</p>
             </div>
           </div>
         </div>
@@ -750,11 +750,11 @@
           <div class="flow-num">3</div>
           <div class="flow-body">
             <strong>
-              <span class="en">Callback resolves the Driver</span>
-              <span class="ckb" dir="rtl">Callback درایڤەر دەدۆزێتەوە</span>
+              <span class="en">Action resolves the Driver</span>
+              <span class="ckb" dir="rtl">Action درایڤەر دەدۆزێتەوە</span>
             </strong>
             <div class="pair">
-              <p class="en"><span class="folder-chip">Http/Callbacks/AuthenticateCallback</span> asks <span class="folder-chip">Support/DriverRegistry</span> for e.g. <code>password</code>. Checks config that this driver is allowed for <code>api</code> or <code>web</code>.</p>
+              <p class="en"><span class="folder-chip">Http/Actions/AuthenticateAction</span> asks <span class="folder-chip">Support/DriverRegistry</span> for e.g. <code>password</code>. Checks config that this driver is allowed for <code>api</code> or <code>web</code>.</p>
               <p class="ckb" dir="rtl">لە DriverRegistry درایڤەر وەردەگرێت (وەک password) و سەیری کۆنفیگ دەکات کە بۆ api/web ڕێگەپێدراوە.</p>
             </div>
           </div>
@@ -804,8 +804,8 @@
       </div>
 
       <div class="card pair">
-        <span class="en"><strong>OTP extra steps:</strong> first <code>SendOtpCallback</code> + <span class="folder-chip">Otp/OtpManager</span> + channel send the code; later verify uses <code>email_otp</code> / <code>whatsapp_otp</code> driver inside the same AuthenticateCallback pipeline.</span>
-        <span class="ckb" dir="rtl"><strong>ھەنگاوی زیادەی OTP:</strong> سەرەتا SendOtpCallback + OtpManager + کەناڵ کۆد دەنێرن؛ دواتر verify ھەمان AuthenticateCallback بەکاردێنێت بە درایڤەری email_otp / whatsapp_otp.</span>
+        <span class="en"><strong>OTP extra steps:</strong> first <code>SendOtpAction</code> + <span class="folder-chip">Otp/OtpManager</span> + channel send the code; later verify uses <code>email_otp</code> / <code>whatsapp_otp</code> driver inside the same AuthenticateAction pipeline.</span>
+        <span class="ckb" dir="rtl"><strong>ھەنگاوی زیادەی OTP:</strong> سەرەتا SendOtp + OtpManager + کەناڵ کۆد دەنێرن؛ دواتر verify ھەمان AuthenticateAction بەکاردێنێت بە درایڤەری email_otp / whatsapp_otp.</span>
       </div>
     </section>
 
