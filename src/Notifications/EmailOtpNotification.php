@@ -27,8 +27,8 @@ final class EmailOtpNotification extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject(__('auth-kit::auth-kit.otp_mail_subject'))
-            ->line(__('auth-kit::auth-kit.otp_mail_line', ['code' => $this->code]))
-            ->line(__('auth-kit::auth-kit.otp_mail_expire'));
+            ->subject('Your login code')
+            ->line('Your one-time login code is '.$this->code)
+            ->line('This code expires shortly. Do not share it with anyone.');
     }
 }

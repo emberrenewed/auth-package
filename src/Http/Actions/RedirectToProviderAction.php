@@ -19,7 +19,7 @@ final class RedirectToProviderAction
             $this->resolveDriver($driver);
         } catch (DriverNotFoundException) {
             return back()->withErrors([
-                'driver' => __('auth-kit::auth-kit.failed'),
+                'driver' => 'These credentials do not match our records.',
             ]);
         }
 

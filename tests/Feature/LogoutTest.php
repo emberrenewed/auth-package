@@ -16,7 +16,7 @@ it('revokes current sanctum token on api logout', function (): void {
         ->postJson('/api/auth/logout');
 
     $response->assertOk()->assertJson([
-        'message' => __('auth-kit::auth-kit.logout'),
+        'message' => 'You have been logged out successfully.',
     ]);
 
     expect($user->fresh()->tokens()->count())->toBe(0);

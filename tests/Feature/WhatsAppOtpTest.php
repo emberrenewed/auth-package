@@ -18,7 +18,7 @@ it('sends a whatsapp otp via the log channel in tests', function (): void {
         'phone' => '+1 (555) 123-4567',
     ])->assertOk()
         ->assertJson([
-            'message' => __('auth-kit::auth-kit.otp_sent'),
+            'message' => 'If that destination is valid, we sent a code.',
         ]);
 
     $this->assertDatabaseHas('auth_kit_otps', [

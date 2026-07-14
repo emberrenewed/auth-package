@@ -18,11 +18,11 @@ final class ForgotPasswordAction
         );
 
         if ($flavor === 'web') {
-            return back()->with('status', __('auth-kit::auth-kit.reset_sent'));
+            return back()->with('status', 'If that email is in our system, we sent a link.');
         }
 
         return response()->json([
-            'message' => __('auth-kit::auth-kit.reset_sent'),
+            'message' => 'If that email is in our system, we sent a link.',
         ]);
     }
 

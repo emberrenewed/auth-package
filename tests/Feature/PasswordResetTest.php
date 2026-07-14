@@ -21,10 +21,10 @@ it('sends reset link always returning 200 regardless of email', function (): voi
     ]);
 
     $existing->assertOk()->assertJson([
-        'message' => __('auth-kit::auth-kit.reset_sent'),
+        'message' => 'If that email is in our system, we sent a link.',
     ]);
     $unknown->assertOk()->assertJson([
-        'message' => __('auth-kit::auth-kit.reset_sent'),
+        'message' => 'If that email is in our system, we sent a link.',
     ]);
 });
 
@@ -46,7 +46,7 @@ it('resets password with valid token and revokes all tokens', function (): void 
     ]);
 
     $response->assertOk()->assertJson([
-        'message' => __('auth-kit::auth-kit.reset_done'),
+        'message' => 'Your password has been reset successfully.',
     ]);
 
     $user->refresh();

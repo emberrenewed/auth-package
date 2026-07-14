@@ -34,7 +34,7 @@ final class AuthenticateAction
         try {
             $driver = $this->resolveDriver($driverName);
         } catch (DriverNotFoundException) {
-            return $this->failure($request, __('auth-kit::auth-kit.failed'), 404, 'driver');
+            return $this->failure($request, 'These credentials do not match our records.', 404, 'driver');
         }
 
         $payload = $driver->validate($request);
@@ -60,13 +60,13 @@ final class AuthenticateAction
                 return redirect()->route($this->registrationCompletionRoute());
             }
 
-            return $this->failure($request, __('auth-kit::auth-kit.subject_not_found'), 404);
+            return $this->failure($request, 'No account is linked to this identity.', 404);
         }
 
         if ($this->isBanned($subject)) {
             LoginFailed::dispatch($driverName, 'banned', $request);
 
-            return $this->failure($request, __('auth-kit::auth-kit.banned'), 403);
+            return $this->failure($request, 'This account has been suspended.', 403);
         }
 
         if ($social) {

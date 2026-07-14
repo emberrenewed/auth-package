@@ -16,7 +16,7 @@ it('sends an email otp and stores a hashed code', function (): void {
         'email' => 'otp@example.com',
     ])->assertOk()
         ->assertJson([
-            'message' => __('auth-kit::auth-kit.otp_sent'),
+            'message' => 'If that destination is valid, we sent a code.',
         ]);
 
     Notification::assertSentOnDemand(EmailOtpNotification::class);

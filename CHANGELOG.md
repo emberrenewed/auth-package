@@ -23,7 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Password forgot/reset flows that never reveal email existence; reset revokes all Sanctum tokens
 - Domain events: `LoginAttempted`, `LoginSucceeded`, `LoginFailed`, `SocialUserResolved`, `LoggedOut`
 - Banned-subject protection (403)
-- Publishable config, migrations, and translations
+- Publishable config and migrations
 - Pint (`pint.json`) and PHPStan/Larastan (`phpstan.neon`, level 6) tooling
 - Pest feature/unit test suite with Orchestra Testbench (coverage target ≥ 90%)
 - README quick-start for install, Google OAuth, custom drivers, events, and Postman usage

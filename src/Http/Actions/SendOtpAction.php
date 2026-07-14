@@ -33,7 +33,7 @@ final class SendOtpAction
         $this->otp->send($channel, $destination);
 
         return response()->json([
-            'message' => __('auth-kit::auth-kit.otp_sent'),
+            'message' => 'If that destination is valid, we sent a code.',
         ]);
     }
 }

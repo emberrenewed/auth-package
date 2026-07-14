@@ -39,7 +39,7 @@ it('returns 401 when access_token is invalid', function (): void {
 
     $response->assertUnauthorized()
         ->assertJson([
-            'message' => __('auth-kit::auth-kit.social_failed'),
+            'message' => 'Social authentication failed. Please try again.',
         ]);
 });
 
@@ -54,7 +54,7 @@ it('returns 404 when no subject and auto_create is false', function (): void {
 
     $response->assertNotFound()
         ->assertJson([
-            'message' => __('auth-kit::auth-kit.subject_not_found'),
+            'message' => 'No account is linked to this identity.',
         ]);
 
     expect(TestUser::query()->where('email', 'missing@example.com')->exists())->toBeFalse();

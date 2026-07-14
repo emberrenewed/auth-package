@@ -60,8 +60,6 @@ final class AuthKitServiceProvider extends ServiceProvider
     {
         $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
 
-        $this->loadTranslationsFrom(__DIR__.'/../lang', 'auth-kit');
-
         $this->publishes([
             __DIR__.'/../config/auth-kit.php' => config_path('auth-kit.php'),
         ], 'auth-kit-config');
@@ -69,10 +67,6 @@ final class AuthKitServiceProvider extends ServiceProvider
         $this->publishes([
             __DIR__.'/../database/migrations' => database_path('migrations'),
         ], 'auth-kit-migrations');
-
-        $this->publishes([
-            __DIR__.'/../lang' => lang_path('vendor/auth-kit'),
-        ], 'auth-kit-lang');
 
         if ($this->app->runningInConsole()) {
             $this->commands([

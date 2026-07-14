@@ -30,21 +30,21 @@ final class ResetPasswordAction
         if ($status !== Password::PASSWORD_RESET) {
             if ($flavor === 'web') {
                 return back()
-                    ->withErrors(['email' => __('auth-kit::auth-kit.failed')])
+                    ->withErrors(['email' => 'These credentials do not match our records.'])
                     ->withInput($request->only('email'));
             }
 
             return response()->json([
-                'message' => __('auth-kit::auth-kit.failed'),
+                'message' => 'These credentials do not match our records.',
             ], 422);
         }
 
         if ($flavor === 'web') {
-            return back()->with('status', __('auth-kit::auth-kit.reset_done'));
+            return back()->with('status', 'Your password has been reset successfully.');
         }
 
         return response()->json([
-            'message' => __('auth-kit::auth-kit.reset_done'),
+            'message' => 'Your password has been reset successfully.',
         ]);
     }
 

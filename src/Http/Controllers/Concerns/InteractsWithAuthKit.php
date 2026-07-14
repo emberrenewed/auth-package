@@ -53,16 +53,16 @@ trait InteractsWithAuthKit
     protected function failureMessage(string $reason): string
     {
         return match ($reason) {
-            'too_many_attempts' => __('auth-kit::auth-kit.throttle', [
-                'seconds' => (int) config('auth-kit.throttle.decay_minutes', 1) * 60,
-            ]),
+            'too_many_attempts' => 'Too many login attempts. Try again in '
+                .((int) config('auth-kit.throttle.decay_minutes', 1) * 60)
+                .' s.',
             'social_failed',
             'google_authentication_failed',
             'facebook_authentication_failed',
             'github_authentication_failed',
             'otp_invalid',
-            'otp_expired' => __('auth-kit::auth-kit.social_failed'),
-            default => __('auth-kit::auth-kit.failed'),
+            'otp_expired' => 'Social authentication failed. Please try again.',
+            default => 'These credentials do not match our records.',
         };
     }
 }

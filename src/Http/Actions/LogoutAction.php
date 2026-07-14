@@ -31,7 +31,7 @@ final class LogoutAction
                 LoggedOut::dispatch($subject, $flavor);
             }
 
-            return redirect('/')->with('status', __('auth-kit::auth-kit.logout'));
+            return redirect('/')->with('status', 'You have been logged out successfully.');
         }
 
         if (is_callable([$subject, 'currentAccessToken'])) {
@@ -47,7 +47,7 @@ final class LogoutAction
         }
 
         return response()->json([
-            'message' => __('auth-kit::auth-kit.logout'),
+            'message' => 'You have been logged out successfully.',
         ]);
     }
 

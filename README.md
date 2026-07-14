@@ -73,12 +73,6 @@ class User extends Authenticatable
 }
 ```
 
-Optional:
-
-```bash
-php artisan vendor:publish --tag=auth-kit-lang
-```
-
 ---
 
 ## Quick start (API)

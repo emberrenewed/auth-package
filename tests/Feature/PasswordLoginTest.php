@@ -38,7 +38,7 @@ it('returns 401 on wrong password without leaking email', function (): void {
 
     $response->assertUnauthorized()
         ->assertJson([
-            'message' => __('auth-kit::auth-kit.failed'),
+            'message' => 'These credentials do not match our records.',
         ])
         ->assertJsonMissing(['email' => 'user@example.com']);
 });
@@ -128,6 +128,6 @@ it('blocks a banned subject with 403', function (): void {
 
     $response->assertForbidden()
         ->assertJson([
-            'message' => __('auth-kit::auth-kit.banned'),
+            'message' => 'This account has been suspended.',
         ]);
 });

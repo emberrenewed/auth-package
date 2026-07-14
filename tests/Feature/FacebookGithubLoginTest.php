@@ -50,6 +50,6 @@ it('returns 401 when facebook token is invalid', function (): void {
         'access_token' => 'bad-token',
     ])->assertUnauthorized()
         ->assertJson([
-            'message' => __('auth-kit::auth-kit.social_failed'),
+            'message' => 'Social authentication failed. Please try again.',
         ]);
 });
