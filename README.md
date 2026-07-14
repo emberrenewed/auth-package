@@ -12,10 +12,17 @@ Laravel authentication package with email/password, Google / Facebook / GitHub S
 In your Laravel project:
 
 ```bash
-composer require emberrenewed/laravel-auth-kit
+composer require emberrenewed/laravel-auth-kit:^1.1
 php artisan auth-kit:install
 php artisan vendor:publish --provider="Laravel\Sanctum\SanctumServiceProvider"
 php artisan migrate
+```
+
+If Packagist is stale and install fails on an old tag, add the GitHub repo first:
+
+```bash
+composer config repositories.auth-kit vcs https://github.com/emberrenewed/auth-package.git
+composer require emberrenewed/laravel-auth-kit:^1.1
 ```
 
 `auth-kit:install` automatically:
