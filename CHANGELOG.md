@@ -7,14 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-07-14
+
 ### Changed
 
 - Driver enable/disable now uses boolean maps in `auth-kit.drivers.*` (`'google' => true`); flat lists remain supported for backward compatibility
-- Renamed `Http/Callbacks` to `Http/Actions` with `*Action` class names (`AuthenticateAction`, `LogoutAction`, `SendOtpAction`, `ForgotPasswordAction`, `ResetPasswordAction`, `ListProvidersAction`, `RedirectToProviderAction`); AuthControllers still inject and invoke them
 
 ### Added
 
 - `AuthKitDrivers` helper to resolve enabled drivers consistently for routes, runtime guards, and `GET /api/auth/providers`
+
+## [1.0.2] - 2026-07-13
+
+### Changed
+
+- Renamed `Http/Callbacks` to `Http/Actions` with `*Action` class names (`AuthenticateAction`, `LogoutAction`, `SendOtpAction`, `ForgotPasswordAction`, `ResetPasswordAction`, `ListProvidersAction`, `RedirectToProviderAction`); AuthControllers still inject and invoke them
+
+### Added
+
 - Multi-driver authentication via `AuthDriver` contract and `DriverRegistry`
 - Built-in `password` driver with rate limiting and identical failure responses
 - Built-in `google` driver (API access-token + web OAuth callback) verifying tokens with Google/Socialite
