@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Auth Kit — Folder &amp; Flow Guide | ڕێنمایی فۆڵدەر و ڕێڕەو</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Noto+Sans+Arabic:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0f1419;
+      --surface: #1a222d;
+      --surface-2: #232d3b;
+      --border: #2e3a4a;
+      --text: #e8eef5;
+      --muted: #8b9bb0;
+      --accent: #3d9a7a;
+      --accent-soft: rgba(61, 154, 122, 0.15);
+      --blue: #5b9fd4;
+      --blue-soft: rgba(91, 159, 212, 0.12);
+      --amber: #d4a35b;
+      --amber-soft: rgba(212, 163, 91, 0.12);
+      --rose: #d46b8a;
+      --rose-soft: rgba(212, 107, 138, 0.12);
+      --radius: 12px;
+      --font: "DM Sans", system-ui, sans-serif;
+      --font-ckb: "Noto Sans Arabic", "DM Sans", system-ui, sans-serif;
+      --mono: "JetBrains Mono", ui-monospace, monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.65;
+      background-image:
+        radial-gradient(ellipse 80% 50% at 10% -10%, rgba(61, 154, 122, 0.18), transparent),
+        radial-gradient(ellipse 60% 40% at 90% 0%, rgba(91, 159, 212, 0.12), transparent);
+      min-height: 100vh;
+    }
+
+    body.lang-ckb { font-family: var(--font-ckb); }
+    body.lang-ckb .ckb { display: block; }
+    body.lang-ckb .en { display: none; }
+    body.lang-en .en { display: block; }
+    body.lang-en .ckb { display: none; }
+    body.lang-both .en,
+    body.lang-both .ckb { display: block; }
+    body.lang-both .pair { display: grid; gap: 0.75rem; }
+    body.lang-both .ckb {
+      border-top: 1px dashed var(--border);
+      padding-top: 0.75rem;
+      margin-top: 0.25rem;
+      color: #c5d0de;
+    }
+
+    .wrap {
+      max-width: 920px;
+      margin: 0 auto;
+      padding: 2rem 1.25rem 4rem;
+    }
+
+    header {
+      margin-bottom: 2.5rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .lang-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .lang-bar button {
+      font-family: inherit;
+      font-size: 0.85rem;
+      font-weight: 600;
+      padding: 0.45rem 0.9rem;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--muted);
+      cursor: pointer;
+      transition: 0.15s ease;
+    }
+
+    .lang-bar button:hover { color: var(--text); border-color: var(--muted); }
+    .lang-bar button.active {
+      background: var(--accent-soft);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    h1 {
+      font-size: clamp(1.6rem, 4vw, 2.15rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.75rem;
+    }
+
+    .lead {
+      color: var(--muted);
+      font-size: 1.05rem;
+      max-width: 42rem;
+    }
+
+    nav.toc {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 2.5rem;
+    }
+
+    nav.toc h2 {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin-bottom: 0.75rem;
+    }
+
+    nav.toc ol {
+      list-style: none;
+      display: grid;
+      gap: 0.4rem;
+      counter-reset: toc;
+    }
+
+    nav.toc a {
+      color: var(--text);
+      text-decoration: none;
+      font-size: 0.95rem;
+      display: flex;
+      gap: 0.6rem;
+      align-items: baseline;
+    }
+
+    nav.toc a::before {
+      counter-increment: toc;
+      content: counter(toc);
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--accent);
+      min-width: 1.2rem;
+    }
+
+    nav.toc a:hover { color: var(--accent); }
+
+    section {
+      margin-bottom: 3rem;
+    }
+
+    section > h2 {
+      font-size: 1.35rem;
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.01em;
+    }
+
+    .section-intro {
+      color: var(--muted);
+      margin-bottom: 1.25rem;
+      font-size: 0.98rem;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem 1.35rem;
+      margin-bottom: 0.85rem;
+    }
+
+    .card h3 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      margin-bottom: 0.65rem;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .path {
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      font-weight: 500;
+      background: var(--surface-2);
+      color: var(--blue);
+      padding: 0.2rem 0.55rem;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+    }
+
+    .why {
+      display: grid;
+      gap: 0.65rem;
+      margin-top: 0.5rem;
+    }
+
+    .why-item {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 0.65rem 0.85rem;
+      align-items: start;
+      padding: 0.65rem 0.75rem;
+      background: var(--bg);
+      border-radius: 8px;
+      border: 1px solid transparent;
+    }
+
+    .label {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      padding: 0.2rem 0.45rem;
+      border-radius: 4px;
+      white-space: nowrap;
+      margin-top: 0.15rem;
+    }
+
+    .label.purpose { background: var(--accent-soft); color: var(--accent); }
+    .label.why-name { background: var(--amber-soft); color: var(--amber); }
+    .label.flow { background: var(--blue-soft); color: var(--blue); }
+
+    .why-item p { font-size: 0.92rem; color: #c8d2de; }
+
+    /* Flow diagram */
+    .flow {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      margin: 1.25rem 0;
+    }
+
+    .flow-step {
+      display: grid;
+      grid-template-columns: 48px 1fr;
+      gap: 0.85rem;
+      position: relative;
+    }
+
+    .flow-step:not(:last-child)::before {
+      content: "";
+      position: absolute;
+      left: 23px;
+      top: 40px;
+      bottom: -4px;
+      width: 2px;
+      background: linear-gradient(to bottom, var(--accent), var(--border));
+      opacity: 0.5;
+    }
+
+    .flow-num {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: var(--accent-soft);
+      border: 2px solid var(--accent);
+      color: var(--accent);
+      font-family: var(--mono);
+      font-weight: 600;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1;
+    }
+
+    .flow-body {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem 1.15rem;
+      margin-bottom: 0.85rem;
+    }
+
+    .flow-body strong {
+      display: block;
+      margin-bottom: 0.35rem;
+      font-size: 1rem;
+    }
+
+    .flow-body .folder-chip {
+      display: inline-block;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--rose);
+      background: var(--rose-soft);
+      padding: 0.15rem 0.45rem;
+      border-radius: 4px;
+      margin: 0.15rem 0.25rem 0.15rem 0;
+    }
+
+    .tree {
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      line-height: 1.7;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      overflow-x: auto;
+      white-space: pre;
+      color: var(--muted);
+    }
+
+    .tree .f { color: var(--blue); }
+    .tree .d { color: var(--accent); font-weight: 500; }
+    .tree .c { color: var(--amber); }
+
+    .compare {
+      display: grid;
+      gap: 0.85rem;
+    }
+
+    @media (min-width: 640px) {
+      .compare { grid-template-columns: 1fr 1fr; }
+    }
+
+    .compare .card h3 { color: var(--amber); font-size: 0.95rem; }
+
+    footer {
+      margin-top: 3rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 0.85rem;
+      text-align: center;
+    }
+
+    [dir="rtl"] .flow-step {
+      grid-template-columns: 48px 1fr;
+    }
+
+    .badge {
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      background: var(--surface-2);
+      color: var(--muted);
+      border: 1px solid var(--border);
+    }
+  </style>
+</head>
+<body class="lang-both">
+  <div class="wrap">
+    <header>
+      <div class="lang-bar" role="group" aria-label="Language">
+        <button type="button" data-lang="en">English</button>
+        <button type="button" data-lang="ckb">کوردی سۆرانی</button>
+        <button type="button" class="active" data-lang="both">Both / ھەردووکیان</button>
+      </div>
+
+      <h1>
+        <span class="en">Auth Kit — Folders &amp; Work Flow</span>
+        <span class="ckb" dir="rtl">ئۆس کیت — فۆڵدەرەکان و ڕێڕەوی کار</span>
+      </h1>
+      <p class="lead pair">
+        <span class="en">This page explains every important folder in this Laravel package: <strong>what it does</strong>, <strong>why it exists</strong>, and <strong>why it is named that way</strong> — plus the full login flow from request to token/session.</span>
+        <span class="ckb" dir="rtl">ئەم پەڕەیە ھەموو فۆڵدەری گرنگی ئەم پاکێجەی Laravel ڕوون دەکاتەوە: <strong>چی دەکات</strong>، <strong>بۆچی ھەیە</strong>، و <strong>بۆچی بەم ناوە ناونراوە</strong> — لەگەڵ تەواوی ڕێڕەوی چوونەژوورەوە لە داواکاری تا توکن/سێشن.</span>
+      </p>
+    </header>
+
+    <nav class="toc" aria-label="Contents">
+      <h2>
+        <span class="en">Contents</span>
+        <span class="ckb" dir="rtl">ناوەڕۆک</span>
+      </h2>
+      <ol>
+        <li><a href="#big-picture"><span class="en">Big picture</span><span class="ckb" dir="rtl">وێنەی گشتی</span></a></li>
+        <li><a href="#tree"><span class="en">Folder tree</span><span class="ckb" dir="rtl">دارەی فۆڵدەر</span></a></li>
+        <li><a href="#folders"><span class="en">Each folder explained</span><span class="ckb" dir="rtl">ڕوونکردنەوەی ھەر فۆڵدەرێک</span></a></li>
+        <li><a href="#flow"><span class="en">How login works (flow)</span><span class="ckb" dir="rtl">چۆن چوونەژوورەوە کاردەکات</span></a></li>
+        <li><a href="#api-web"><span class="en">API vs Web</span><span class="ckb" dir="rtl">API بەرامبەر وێب</span></a></li>
+        <li><a href="#names"><span class="en">Why these names</span><span class="ckb" dir="rtl">بۆچی ئەم ناوانە</span></a></li>
+      </ol>
+    </nav>
+
+    <!-- BIG PICTURE -->
+    <section id="big-picture">
+      <h2>
+        <span class="en">1. Big picture</span>
+        <span class="ckb" dir="rtl">١. وێنەی گشتی</span>
+      </h2>
+      <div class="section-intro pair">
+        <span class="en">This project is <strong>not a full Laravel app</strong>. It is a <strong>reusable package</strong> (library) named <code class="path">emberrenewed/laravel-auth-kit</code>. Your real app installs it with Composer. Code lives under namespace <code class="path">Technobase\AuthKit</code>.</span>
+        <span class="ckb" dir="rtl">ئەم پڕۆژەیە <strong>ئەپی تەواوی Laravel نییە</strong>. <strong>پاکێجێکی دووبارە بەکارھێنراوە</strong> (لایبرەری) بە ناوی <code class="path">emberrenewed/laravel-auth-kit</code>. ئەپی ڕاستەقینەت بە Composer دایەدەگرێت. کۆدەکە لە ژێر namespaceـی <code class="path">Technobase\AuthKit</code>ـدایە.</span>
+      </div>
+      <div class="card pair">
+        <span class="en">Think of it like a ready-made <strong>authentication engine</strong>: password, Google, Facebook, GitHub, Email OTP, WhatsApp OTP — for both browser sessions and API tokens (Sanctum).</span>
+        <span class="ckb" dir="rtl">وەک <strong>مۆتۆڕێکی ئامادەی ناسنامە / چوونەژوورەوە</strong> بیربکەرەوە: وشەی نهێنی، Google، Facebook، GitHub، OTPـی ئیمەیڵ، OTPـی WhatsApp — بۆ ھەردووک سێشنی وێبگەڕ و توکنی APIـی Sanctum.</span>
+      </div>
+    </section>
+
+    <!-- TREE -->
+    <section id="tree">
+      <h2>
+        <span class="en">2. Folder tree (map)</span>
+        <span class="ckb" dir="rtl">٢. دارەی فۆڵدەر (نەخشە)</span>
+      </h2>
+      <div class="section-intro pair">
+        <span class="en">Green = folders that hold the brain of the package. Blue = files you touch often. Amber = supporting config/DB/tests.</span>
+        <span class="ckb" dir="rtl">سەوز = فۆڵدەرەکانی مێشکی پاکێج. شین = فایلەکانی زۆر دەستکاری دەکرێن. زەرد = ڕێکخستن / داتابەیس / تێست.</span>
+      </div>
+      <pre class="tree" aria-label="Folder tree"><span class="d">auth-kit/</span>
+├── <span class="f">composer.json</span>          <span class="c"># package identity + autoload</span>
+├── <span class="d">config/</span>
+│   └── <span class="f">auth-kit.php</span>      <span class="c"># switches: drivers, routes, OTP…</span>
+├── <span class="d">routes/</span>
+│   ├── <span class="f">api.php</span>            <span class="c"># /api/auth/…</span>
+│   └── <span class="f">web.php</span>            <span class="c"># /auth/…</span>
+├── <span class="d">database/migrations/</span>   <span class="c"># OTP table + user columns</span>
+├── <span class="d">lang/en/</span>               <span class="c"># error messages</span>
+├── <span class="d">tests/</span>                 <span class="c"># Pest feature + unit tests</span>
+├── <span class="d">postman/</span>               <span class="c"># API collection for Postman</span>
+└── <span class="d">src/</span>                   <span class="c"># ← ALL PHP business logic</span>
+    ├── <span class="f">AuthKitServiceProvider.php</span>
+    ├── <span class="d">Console/</span>            <span class="c"># artisan auth-kit:install</span>
+    ├── <span class="d">Contracts/</span>          <span class="c"># interfaces (rules / promises)</span>
+    ├── <span class="d">Drivers/</span>            <span class="c"># password, google, otp…</span>
+    ├── <span class="d">Events/</span>             <span class="c"># LoginSucceeded, Failed…</span>
+    ├── <span class="d">Exceptions/</span>         <span class="c"># typed errors</span>
+    ├── <span class="d">Facades/</span>            <span class="c"># AuthKit:: facade</span>
+    ├── <span class="d">Http/</span>
+    │   ├── <span class="d">Controllers/</span>    <span class="c"># thin entry (Api / Web)</span>
+    │   ├── <span class="d">Callbacks/</span>      <span class="c"># real work of each action</span>
+    │   ├── <span class="d">Requests/</span>       <span class="c"># validation rules</span>
+    │   ├── <span class="d">CredentialIssuers/</span> <span class="c"># session vs Sanctum token</span>
+    │   └── <span class="d">Resources/</span>      <span class="c"># JSON shape of user</span>
+    ├── <span class="d">Otp/</span>                <span class="c"># generate / verify codes</span>
+    │   └── <span class="d">Channels/</span>       <span class="c"># mail, WhatsApp, log</span>
+    ├── <span class="d">Notifications/</span>      <span class="c"># Email OTP mail</span>
+    └── <span class="d">Support/</span>            <span class="c"># registry, resolvers, DTOs</span></pre>
+    </section>
+
+    <!-- FOLDERS -->
+    <section id="folders">
+      <h2>
+        <span class="en">3. Each folder — purpose, why, name</span>
+        <span class="ckb" dir="rtl">٣. ھەر فۆڵدەرێک — مەبەست، ھۆکار، ناو</span>
+      </h2>
+
+      <!-- src -->
+      <article class="card">
+        <h3><span class="path">src/</span> <span class="badge">core</span></h3>
+        <div class="why">
+          <div class="why-item">
+            <span class="label purpose">Purpose</span>
+            <div class="pair">
+              <p class="en">Holds all PHP classes of the package. This is the brain.</p>
+              <p class="ckb" dir="rtl">ھەموو کلاسەکانی PHPـی پاکێج لێرەیە. ئەمە مێشکی پاکێجە.</p>
+            </div>
+          </div>
+          <div class="why-item">
+            <span class="label why-name">Why name</span>
+            <div class="pair">
+              <p class="en"><strong>src</strong> = <em>source</em> (source code). Industry standard for “where the real code lives”.</p>
+              <p class="ckb" dir="rtl"><strong>src</strong> واتە <em>source</em> (سەرچاوەی کۆد). ستانداردی پیشەسازییە بۆ «کۆدی سەرەکی لێرەیە».</p>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- Contracts -->
+      <article class="card">
+        <h3><span class="path">src/Contracts/</span></h3>
+        <div class="why">
+          <div class="why-item">
+            <span class="label purpose">Purpose</span>
+            <div class="pair">
+              <p class="en">Interfaces only: <code>AuthDriver</code>, <code>CredentialIssuer</code>, <code>SubjectResolver</code>, <code>OtpChannel</code>. They define <em>what</em> a class must do, not <em>how</em>.</p>
+              <p class="ckb" dir="rtl">تەنھا interface: پێناسە دەکەن کە کلاسێک <em>چی</em> دەبێت بیکات، نەك <em>چۆن</em>.</p>
+            </div>
+          </div>
+          <div class="why-item">
+            <span class="label why-name">Why name</span>
+            <div class="pair">
+              <p class="en"><strong>Contract</strong> = a written promise between pieces of code. Like a hiring contract: “you must implement these methods.”</p>
+              <p class="ckb" dir="rtl"><strong>Contract</strong> واتە گرێبەست/بەڵێننامە. وەک گرێبەستی کار: «دەبێت ئەم مێتۆدانە جێبەجێ بکەیت.»</p>
+            </div>
+          </div>
+          <div class="why-item">
+            <span class="label flow">Why use</span>
+            <div class="pair">
+              <p class="en">So you can add WhatsApp OTP or a new social login without rewriting AuthenticateCallback — just a new Driver that obeys the same AuthDriver contract.</p>
+              <p class="ckb" dir="rtl">بۆ ئەوەی OTPـی نوێ یان loginـی کۆمەڵایەتی نوێ زیاد بکەیت بەبێ گۆڕینی AuthenticateCallback — تەنھا Driverـێکی نوێ کە ھەمان گرێبەستی AuthDriver جێبەجێ دەکات.</p>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- Drivers -->
+      <article class="card">
+        <h3><span class="path">src/Drivers/</span></h3>
+        <div class="why">
+          <div class="why-item">
+            <span class="label purpose">Purpose</span>
+            <div class="pair">
+              <p class="en">One class per login method: Password, Google, Facebook, GitHub, EmailOtp, WhatsAppOtp. Each validates input and builds a normalized identity (email/phone/provider ids).</p>
+              <p class="ckb" dir="rtl">یەک کلاس بۆ ھەر شێوازی چوونەژوورەوە. ھەر کامێک داواکاری پشتڕاست دەکاتەوە و ناسنامەیەکی یەکگرتوو دروست دەکات (ئیمەیڵ/تەلەفۆن/provider).</p>
+            </div>
+          </div>
+          <div class="why-item">
+            <span class="label why-name">Why name</span>
+            <div class="pair">
+              <p class="en"><strong>Driver</strong> = like a car driver for a specific road. PasswordDriver “drives” password login; GoogleDriver “drives” Google login. Same steering wheel (AuthDriver), different roads.</p>
+              <p class="ckb" dir="rtl"><strong>Driver</strong> وەک شۆفێر بۆ ڕێگایەکی دیاریکراو. PasswordDriver شۆفێری وشەی نهێنییە؛ GoogleDriver شۆفێری Googleـە. ھەمان ئامێری لێخوڕین، ڕێگای جیاواز.</p>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- Http -->
+      <article class="card">
+        <h3><span class="path">src/Http/</span></h3>
+        <div class="why">
+          <div class="why-item">
+            <span class="label purpose">Purpose</span>
+            <div class="pair">
+              <p class="en">Everything that talks to the HTTP world: controllers, form validation, JSON resources, callbacks that return responses.</p>
+              <p class="ckb" dir="rtl">ھەموو شتێک کە لەگەڵ جیھانی HTTP قسە دەکات: کۆنترۆڵەر، پشتڕاستکردنەوەی فۆرم، JSON، callbackـەکان کە وەڵام دەگەڕێننەوە.</p>
+            </div>
+          </div>
+          <div class="why-item">
+            <span class="label why-name">Why name</span>
+            <div class="pair">
+              <p class="en"><strong>Http</strong> = HyperText Transfer Protocol. Laravel convention: put request/response code under Http.</p>
+              <p class="ckb" dir="rtl"><strong>Http</strong> پڕۆتۆکۆلی وێبە. لە Laravelـدا کۆدی داواکاری/وەڵام لەژێر Http دەخرێت.</p>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- Controllers -->
+      <article class="card">
+        <h3><span class="path">src/Http/Controllers/</span> <span class="path">Api/</span> + <span class="path">Web/</span></h3>
+        <div class="why">
+          <div class="why-item">
+            <span class="label purpose">Purpose</span>
+            <div class="pair">
+              <p class="en">Thin doors. Routes call controller methods. Controllers almost immediately hand work to Callbacks. Api returns JSON/token; Web returns redirects/session.</p>
+              <p class="ckb" dir="rtl">دەرگایەکی تەنک. ڕوتەکان کۆنترۆڵەر بانگ دەکەن. کۆنترۆڵەر خێرا کار دەدات بە Callback. Api JSON/توکن دەگەڕێنێتەوە؛ Web ڕیدایرێکت/سێشن.</p>
+            </div>
+          </div>
+          <div class="why-item">
+            <span class="label why-name">Why name</span>
+            <div class="pair">
+              <p class="en"><strong>Controller</strong> = control tower: receives the plane (request), decides which runway (callback). <strong>Api</strong> = Application Programming Interface (apps/mobile). <strong>Web</strong> = browser pages.</p>
+              <p class="ckb" dir="rtl"><strong>Controller</strong> وەک تاوەری کۆنترۆڵ: فڕۆکە (داواکاری) وەردەگرێت، ڕێگا دیاری دەکات. <strong>Api</strong> بۆ ئەپ/ مۆبایل. <strong>Web</strong> بۆ وێبگەڕ.</p>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- Callbacks -->
+      <article class="card">
+        <h3><span class="path">src/Http/Callbacks/</span></h3>
+        <div class="why">
+          <div class="why-item">
+            <span class="label purpose">Purpose</span>
+            <div class="pair">
+              <p class="en">Where the real action lives: <code>AuthenticateCallback</code>, <code>LogoutCallback</code>, <code>SendOtpCallback</code>, password reset, redirect to Google, etc. Invokable classes (<code>__invoke</code>).</p>
+              <p class="ckb" dir="rtl">شوێنی کرداری ڕاستەقینە: چوونەژوورەوە، دەرچوون، ناردنی OTP، ڕیسێتی وشەی نهێنی… کلاسە Invokableـەکان.</p>
+            </div>
+          </div>
+          <div class="why-item">
+            <span class="label why-name">Why name</span>
+            <div class="pair">
+              <p class="en"><strong>Callback</strong> = “call me back to do this job.” The controller calls the callback; the callback runs the full business steps.</p>
+              <p class="ckb" dir="rtl"><strong>Callback</strong> واتە «پێمەوە بگەڕێوە بۆ ئەم کارە.» کۆنترۆڵەر callback بانگ دەکات؛ callback ھەنگاوەکانی بزنس جێبەجێ دەکات.</p>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- CredentialIssuers -->
+      <article class="card">
+        <h3><span class="path">src/Http/CredentialIssuers/</span></h3>
+        <div class="why">
+          <div class="why-item">
+            <span class="label purpose">Purpose</span>
+            <div class="pair">
+              <p class="en">After login succeeds: <code>SanctumCredentialIssuer</code> creates an API token; <code>SessionCredentialIssuer</code> logs the user into a web session.</p>
+              <p class="ckb" dir="rtl">دوای سەرکەوتنی چوونەژوورەوە: یەکێک توکنی API دروست دەکات؛ ئەوی دیکە سێشنی وێب دەکاتەوە.</p>
+            </div>
+          </div>
+          <div class="why-item">
+            <span class="label why-name">Why name</span>
+            <div class="pair">
+              <p class="en"><strong>Credential</strong> = proof you are logged in (token or session). <strong>Issuer</strong> = the one who issues/gives that proof (like a passport office).</p>
+              <p class="ckb" dir="rtl"><strong>Credential</strong> = بەڵگەنامەی چوونەژوورەوە (توکن یان سێشن). <strong>Issuer</strong> = دەستگای دەرکردنی ئەو بەڵگەیە (وەک ئۆفیسی پاسپۆرت).</p>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- Requests -->
+      <article class="card">
+        <h3><span class="path">src/Http/Requests/</span></h3>
+        <div class="why">
+          <div class="why-item">
+            <span class="label purpose">Purpose</span>
+            <div class="pair">
+              <p class="en">Form Request classes: rules for login, social token, forgot/reset password — reject bad input early.</p>
+              <p class="ckb" dir="rtl">یاساکانی پشتڕاستکردنەوەی فۆرم — داواکاری خراپ زوو ڕەت دەکرێتەوە.</p>
+            </div>
+          </div>
+          <div class="why-item">
+            <span class="label why-name">Why name</span>
+            <div class="pair">
+              <p class="en">Laravel name for “validated HTTP request object.”</p>
+              <p class="ckb" dir="rtl">ناوی Laravel بۆ «داواکاری HTTPـی پشتڕاستکراو.»</p>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- Support -->
+      <article class="card">
+        <h3><span class="path">src/Support/</span></h3>
+        <div class="why">
+          <div class="why-item">
+            <span class="label purpose">Purpose</span>
+            <div class="pair">
+              <p class="en"><code>DriverRegistry</code> = map of name → driver. <code>EloquentSubjectResolver</code> = find/create User. <code>NormalizedIdentity</code> = same identity shape for every driver.</p>
+              <p class="ckb" dir="rtl">تۆماری درایڤەرەکان، دۆزینەوە/دروستکردنی User، و شکڵێکی یەکگرتووی ناسنامە بۆ ھەموو درایڤەرەکان.</p>
+            </div>
+          </div>
+          <div class="why-item">
+            <span class="label why-name">Why name</span>
+            <div class="pair">
+              <p class="en"><strong>Support</strong> = helpers that support the main flow, not the public HTTP face.</p>
+              <p class="ckb" dir="rtl"><strong>Support</strong> = یارمەتیدەرەکان کە پشتگیری ڕێڕەوی سەرەکی دەکەن، نەك ڕووی گشتی HTTP.</p>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- Otp -->
+      <article class="card">
+        <h3><span class="path">src/Otp/</span> + <span class="path">Channels/</span></h3>
+        <div class="why">
+          <div class="why-item">
+            <span class="label purpose">Purpose</span>
+            <div class="pair">
+              <p class="en"><code>OtpManager</code> creates, stores, verifies one-time codes. Channels send them (Mail, WhatsApp Cloud, Log for testing).</p>
+              <p class="ckb" dir="rtl">کۆدی یەکجار بەکارهێنان دروست/پاشەکەوت/پشتڕاست دەکات. Channelـەکان دەینێرن (ئیمەیڵ، واتساپ، یان Log بۆ تێست).</p>
+            </div>
+          </div>
+          <div class="why-item">
+            <span class="label why-name">Why name</span>
+            <div class="pair">
+              <p class="en"><strong>OTP</strong> = One-Time Password. <strong>Channel</strong> = the pipe/path the message travels through.</p>
+              <p class="ckb" dir="rtl"><strong>OTP</strong> = وشەی نهێنی یەکجار بەکارھێنان. <strong>Channel</strong> = کەناڵ/بۆری ناردنی پەیام.</p>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- Events / Exceptions -->
+      <article class="card">
+        <h3><span class="path">src/Events/</span> · <span class="path">src/Exceptions/</span></h3>
+        <div class="why">
+          <div class="why-item">
+            <span class="label purpose">Purpose</span>
+            <div class="pair">
+              <p class="en">Events announce something happened (LoginSucceeded) so your app can listen (send mail, log). Exceptions are typed failures (banned user, bad credentials, unknown driver).</p>
+              <p class="ckb" dir="rtl">ڕووداوەکان ئاگادار دەکەنەوە کە شتێک ڕوویدا (بۆ گوێگرتن لە ئەپەکەت). Exceptionـەکان ھەڵەی جۆردارن (بان، وشەی نهێنی ھەڵە، درایڤەری نەناسراو).</p>
+            </div>
+          </div>
+          <div class="why-item">
+            <span class="label why-name">Why name</span>
+            <div class="pair">
+              <p class="en"><strong>Event</strong> = something that happened. <strong>Exception</strong> = an exceptional (abnormal) situation that interrupts the happy path.</p>
+              <p class="ckb" dir="rtl"><strong>Event</strong> = ڕووداو. <strong>Exception</strong> = دۆخی نائاسایی کە ڕێڕەوی ئاسایی دەپسێنێت.</p>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- routes config database -->
+      <article class="card">
+        <h3><span class="path">routes/</span> · <span class="path">config/</span> · <span class="path">database/</span> · <span class="path">lang/</span> · <span class="path">tests/</span></h3>
+        <div class="why">
+          <div class="why-item">
+            <span class="label purpose">Purpose</span>
+            <div class="pair">
+              <p class="en"><strong>routes</strong> map URLs → controllers. <strong>config</strong> turns features on/off (which drivers, prefixes). <strong>database/migrations</strong> add OTP table + columns like phone. <strong>lang</strong> human messages. <strong>tests</strong> prove the flow still works.</p>
+              <p class="ckb" dir="rtl"><strong>routes</strong> URL دەبەستێتەوە بە کۆنترۆڵەر. <strong>config</strong> تایبەتمەندی دادەسەرەخات. <strong>migrations</strong> خشتە/ستوونی داتابەیس زیاد دەکەن. <strong>lang</strong> پەیامی مرۆڤ. <strong>tests</strong> دڵنیایی کە ڕێڕەو ھێشتا کار دەکات.</p>
+            </div>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <!-- FLOW -->
+    <section id="flow">
+      <h2>
+        <span class="en">4. How login works (full flow)</span>
+        <span class="ckb" dir="rtl">٤. چۆن چوونەژوورەوە کاردەکات (ڕێڕەوی تەواو)</span>
+      </h2>
+      <div class="section-intro pair">
+        <span class="en">Example: <code class="path">POST /api/auth/login</code> with email + password. Same pipeline is used for Google/OTP — only the Driver changes.</span>
+        <span class="ckb" dir="rtl">نموونە: <code class="path">POST /api/auth/login</code> بە ئیمەیڵ + وشەی نهێنی. ھەمان ھێڵ بۆ Google/OTP بەکاردێت — تەنھا Driver دەگۆڕێت.</span>
+      </div>
+
+      <div class="flow">
+        <div class="flow-step">
+          <div class="flow-num">1</div>
+          <div class="flow-body">
+            <strong>
+              <span class="en">Request hits a route</span>
+              <span class="ckb" dir="rtl">داواکاری دەگاتە ڕووت</span>
+            </strong>
+            <div class="pair">
+              <p class="en">URL is defined in <span class="folder-chip">routes/api.php</span> or <span class="folder-chip">routes/web.php</span>. Prefix comes from <span class="folder-chip">config/auth-kit.php</span>.</p>
+              <p class="ckb" dir="rtl">URL لە ڕووتدا دیاریکراوە. پێشگر (prefix) لە کۆنفیگەوە دێت.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="flow-step">
+          <div class="flow-num">2</div>
+          <div class="flow-body">
+            <strong>
+              <span class="en">Controller opens the door</span>
+              <span class="ckb" dir="rtl">کۆنترۆڵەر دەرگا دەکاتەوە</span>
+            </strong>
+            <div class="pair">
+              <p class="en"><span class="folder-chip">Http/Controllers/Api/AuthController</span> method <code>login()</code> — thin. It calls <code>AuthenticateCallback</code>.</p>
+              <p class="ckb" dir="rtl">مێتۆدی login تەنکە؛ راستەوخۆ AuthenticateCallback بانگ دەکات.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="flow-step">
+          <div class="flow-num">3</div>
+          <div class="flow-body">
+            <strong>
+              <span class="en">Callback resolves the Driver</span>
+              <span class="ckb" dir="rtl">Callback درایڤەر دەدۆزێتەوە</span>
+            </strong>
+            <div class="pair">
+              <p class="en"><span class="folder-chip">Http/Callbacks/AuthenticateCallback</span> asks <span class="folder-chip">Support/DriverRegistry</span> for e.g. <code>password</code>. Checks config that this driver is allowed for <code>api</code> or <code>web</code>.</p>
+              <p class="ckb" dir="rtl">لە DriverRegistry درایڤەر وەردەگرێت (وەک password) و سەیری کۆنفیگ دەکات کە بۆ api/web ڕێگەپێدراوە.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="flow-step">
+          <div class="flow-num">4</div>
+          <div class="flow-body">
+            <strong>
+              <span class="en">Driver validates &amp; builds identity</span>
+              <span class="ckb" dir="rtl">درایڤەر پشتڕاست دەکاتەوە و ناسنامە دروست دەکات</span>
+            </strong>
+            <div class="pair">
+              <p class="en"><span class="folder-chip">Drivers/PasswordDriver</span> (or Google/OTP…) runs <code>validate()</code> then <code>resolveIdentity()</code> → <span class="folder-chip">Support/NormalizedIdentity</span>. Event: <code>LoginAttempted</code>.</p>
+              <p class="ckb" dir="rtl">درایڤەر validate و resolveIdentity دەکات → NormalizedIdentity. ڕووداوی LoginAttempted دەنێردرێت.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="flow-step">
+          <div class="flow-num">5</div>
+          <div class="flow-body">
+            <strong>
+              <span class="en">Find (or create) the Subject = User</span>
+              <span class="ckb" dir="rtl">دۆزینەوە (یان دروستکردن)ی Subject = بەکارھێنەر</span>
+            </strong>
+            <div class="pair">
+              <p class="en"><span class="folder-chip">Support/EloquentSubjectResolver</span> looks up the user by email/phone/provider. If banned → fail. Name <strong>subject</strong> means “the person being authenticated.”</p>
+              <p class="ckb" dir="rtl">EloquentSubjectResolver بەکارھێنەر بە ئیمەیڵ/تەلەفۆن/provider دەدۆزێتەوە. ئەگەر بان بێت → شکست. <strong>subject</strong> واتە «ئەو کەسەی ناسنامەی بۆ پشتڕاست دەکرێتەوە.»</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="flow-step">
+          <div class="flow-num">6</div>
+          <div class="flow-body">
+            <strong>
+              <span class="en">Issue credentials (token or session)</span>
+              <span class="ckb" dir="rtl">دەرکردنی بەڵگەنامە (توکن یان سێشن)</span>
+            </strong>
+            <div class="pair">
+              <p class="en">API → <span class="folder-chip">CredentialIssuers/SanctumCredentialIssuer</span>. Web → <span class="folder-chip">SessionCredentialIssuer</span>. Then <code>LoginSucceeded</code> event. Response via <span class="folder-chip">Http/Resources/AuthResource</span>.</p>
+              <p class="ckb" dir="rtl">API → Sanctum توکن. Web → سێشن. پاشان ڕووداوی LoginSucceeded و وەڵام لە ڕێگەی AuthResource.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card pair">
+        <span class="en"><strong>OTP extra steps:</strong> first <code>SendOtpCallback</code> + <span class="folder-chip">Otp/OtpManager</span> + channel send the code; later verify uses <code>email_otp</code> / <code>whatsapp_otp</code> driver inside the same AuthenticateCallback pipeline.</span>
+        <span class="ckb" dir="rtl"><strong>ھەنگاوی زیادەی OTP:</strong> سەرەتا SendOtpCallback + OtpManager + کەناڵ کۆد دەنێرن؛ دواتر verify ھەمان AuthenticateCallback بەکاردێنێت بە درایڤەری email_otp / whatsapp_otp.</span>
+      </div>
+    </section>
+
+    <!-- API vs WEB -->
+    <section id="api-web">
+      <h2>
+        <span class="en">5. API vs Web — same engine, different door</span>
+        <span class="ckb" dir="rtl">٥. API بەرامبەر وێب — ھەمان مۆتۆڕ، دەرگای جیاواز</span>
+      </h2>
+      <div class="compare">
+        <div class="card">
+          <h3>
+            <span class="en">API (mobile / SPA)</span>
+            <span class="ckb" dir="rtl">API (مۆبایل / SPA)</span>
+          </h3>
+          <div class="pair">
+            <p class="en">Routes in <code>routes/api.php</code> → usually under <code>/api/auth/…</code>. Returns JSON + Sanctum bearer token. Good for Flutter, React Native, Postman.</p>
+            <p class="ckb" dir="rtl">ڕووتەکانی api → زۆرجار <code>/api/auth/…</code>. JSON + توکنی Sanctum دەگەڕێنێتەوە. باشە بۆ Flutter، React Native، Postman.</p>
+          </div>
+        </div>
+        <div class="card">
+          <h3>
+            <span class="en">Web (browser)</span>
+            <span class="ckb" dir="rtl">وێب (وێبگەڕ)</span>
+          </h3>
+          <div class="pair">
+            <p class="en">Routes in <code>routes/web.php</code> → <code>/auth/…</code>. Cookie session + redirects (especially OAuth Google/Facebook/GitHub redirect → callback).</p>
+            <p class="ckb" dir="rtl">ڕووتەکانی web → <code>/auth/…</code>. سێشنی کووکی + ڕیدایرێکت (بەتایبەتی OAuth: ڕەوانەکردن بۆ Google پاشان گەڕانەوە).</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- NAMES GLOSSARY -->
+    <section id="names">
+      <h2>
+        <span class="en">6. Name glossary (perfect meaning)</span>
+        <span class="ckb" dir="rtl">٦. فەرھەنگی ناوەکان (مانای تەواو)</span>
+      </h2>
+
+      <article class="card">
+        <h3>Auth Kit</h3>
+        <div class="pair">
+          <p class="en"><strong>Auth</strong> = Authentication (proving who you are). <strong>Kit</strong> = toolbox / ready set of tools. So: a ready toolbox for login.</p>
+          <p class="ckb" dir="rtl"><strong>Auth</strong> = ناسنامە پشتڕاستکردنەوە (سەلماندنی تۆ کێیت). <strong>Kit</strong> = سندوقی ئامراز / کۆمەڵە ئامادە. واتە: سندوقێکی ئامادە بۆ چوونەژوورەوە.</p>
+        </div>
+      </article>
+
+      <article class="card">
+        <h3>Subject</h3>
+        <div class="pair">
+          <p class="en">In security English, the <strong>subject</strong> is the entity being authenticated (usually your User model). Not “school subject” — “the person under examination.”</p>
+          <p class="ckb" dir="rtl">لە زمانی ئاسایشدا، <strong>subject</strong> ئەو بونەوەرەیە کە ناسنامەی بۆ پشتڕاست دەکرێتەوە (زۆرجار مۆدێلی User). نەك «بابەتی قوتابخانە» — بەڵکو «ئەو کەسەی پشکنین دەکرێت.»</p>
+        </div>
+      </article>
+
+      <article class="card">
+        <h3>Flavor (api / web)</h3>
+        <div class="pair">
+          <p class="en">Internal name for “which taste of auth”: API flavor issues tokens; Web flavor issues sessions. Same recipe, different serving.</p>
+          <p class="ckb" dir="rtl">ناوی ناوخۆیی بۆ «چ جۆرێکی ئۆس»: flavorـی API توکن دەدات؛ flavorـی Web سێشن دەدات. ھەمان ڕێچکە، جۆری جیاوازی خزمەتکردن.</p>
+        </div>
+      </article>
+
+      <article class="card">
+        <h3>NormalizedIdentity</h3>
+        <div class="pair">
+          <p class="en"><strong>Normalize</strong> = make same shape. Google, password, and OTP all produce different raw data; this class unifies them into one simple identity object.</p>
+          <p class="ckb" dir="rtl"><strong>Normalize</strong> = کردن بە ھەمان شکڵ. Google و وشەی نهێنی و OTP داتای جیاواز دەدەن؛ ئەم کلاسە یەکیان دەکات بۆ یەک تەنۆکەی ناسنامە.</p>
+        </div>
+      </article>
+
+      <article class="card">
+        <h3>Registry</h3>
+        <div class="pair">
+          <p class="en"><strong>DriverRegistry</strong> is a phone book: name <code>"google"</code> → GoogleDriver class. Register = put in the book; resolve = look up.</p>
+          <p class="ckb" dir="rtl"><strong>DriverRegistry</strong> وەک پەیوەندینامە/تەلەفۆنبووک: ناوی <code>"google"</code> → کلاسەکەی GoogleDriver. تۆمارکردن = دانان لە کتێب؛ resolve = گەڕان.</p>
+        </div>
+      </article>
+
+      <article class="card">
+        <h3>ServiceProvider</h3>
+        <div class="pair">
+          <p class="en">Laravel’s boot loader for the package: registers drivers, loads migrations, publishes config, registers <code>auth-kit:install</code>.</p>
+          <p class="ckb" dir="rtl">دەستپێکەری Laravel بۆ پاکێج: درایڤەرەکان تۆمار دەکات، migration بار دەکات، کۆنفیگ بڵاو دەکاتەوە، فەرمانی install تۆمار دەکات.</p>
+        </div>
+      </article>
+    </section>
+
+    <footer>
+      <p class="pair">
+        <span class="en">Open this file in any browser. Toggle language above. Package: emberrenewed/laravel-auth-kit</span>
+        <span class="ckb" dir="rtl">ئەم فایلە لە ھەر وێبگەڕێکدا بکەرەوە. زمان لە سەرەوە بگۆڕە. پاکێج: emberrenewed/laravel-auth-kit</span>
+      </p>
+    </footer>
+  </div>
+
+  <script>
+    const body = document.body;
+    const buttons = document.querySelectorAll(".lang-bar button");
+
+    function setLang(lang) {
+      body.classList.remove("lang-en", "lang-ckb", "lang-both");
+      body.classList.add("lang-" + lang);
+      body.dir = lang === "ckb" ? "rtl" : "ltr";
+      if (lang === "both") body.dir = "ltr";
+      buttons.forEach((b) => b.classList.toggle("active", b.dataset.lang === lang));
+      try { localStorage.setItem("authkit-guide-lang", lang); } catch (_) {}
+    }
+
+    buttons.forEach((b) => b.addEventListener("click", () => setLang(b.dataset.lang)));
+
+    try {
+      const saved = localStorage.getItem("authkit-guide-lang");
+      if (saved) setLang(saved);
+    } catch (_) {}
+  </script>
+</body>
+</html>
