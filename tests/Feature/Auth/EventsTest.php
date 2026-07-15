@@ -11,7 +11,6 @@ use Technobase\AuthKit\Events\Auth\LoginFailed;
 use Technobase\AuthKit\Events\Auth\LoginSucceeded;
 use Technobase\AuthKit\Events\Social\SocialUserResolved;
 use Technobase\AuthKit\Tests\TestCase;
-use Technobase\AuthKit\Tests\TestUser;
 
 beforeEach(function (): void {
     Event::fake([
@@ -22,49 +21,70 @@ beforeEach(function (): void {
     ]);
 });
 
-it('fires LoginAttempted on every attempt', function (): void {
+it('fires LoginAttempted on google login', function (): void {
     /** @var TestCase $this */
-    $this->createUser();
+    $this->createUser([
+        'email' => 'google@example.com',
+        'provider' => 'google',
+        'provider_id' => 'google-1',
+    ]);
 
-    $this->postJson('/api/auth/login', [
-        'email' => 'user@example.com',
-        'password' => 'password',
-    ])->assertOk();
+    $socialUser = Mockery::mock(SocialiteUserContract::class);
+    $socialUser->shouldReceive('getId')->andReturn('google-1');
+    $socialUser->shouldReceive('getEmail')->andReturn('google@example.com');
+    $socialUser->shouldReceive('getName')->andReturn('Google User');
+    $socialUser->shouldReceive('getAvatar')->andReturn(null);
 
-    Event::assertDispatched(LoginAttempted::class, function (LoginAttempted $event): bool {
-        return $event->driver === 'password';
-    });
+    $provider = Mockery::mock(AbstractProvider::class);
+    $provider->shouldReceive('stateless')->andReturnSelf();
+    $provider->shouldReceive('userFromToken')->with('token')->andReturn($socialUser);
+    Socialite::shouldReceive('driver')->with('google')->andReturn($provider);
+
+    $this->postJson('/api/auth/google', ['access_token' => 'token'])->assertOk();
+
+    Event::assertDispatched(LoginAttempted::class, fn (LoginAttempted $event): bool => $event->driver === 'google');
 });
 
-it('fires LoginSucceeded on a valid login', function (): void {
+it('fires LoginSucceeded on valid google login', function (): void {
     /** @var TestCase $this */
-    $user = $this->createUser();
+    $user = $this->createUser([
+        'email' => 'ok@example.com',
+        'provider' => 'google',
+        'provider_id' => 'google-ok',
+    ]);
 
-    $this->postJson('/api/auth/login', [
-        'email' => 'user@example.com',
-        'password' => 'password',
-    ])->assertOk();
+    $socialUser = Mockery::mock(SocialiteUserContract::class);
+    $socialUser->shouldReceive('getId')->andReturn('google-ok');
+    $socialUser->shouldReceive('getEmail')->andReturn('ok@example.com');
+    $socialUser->shouldReceive('getName')->andReturn('OK');
+    $socialUser->shouldReceive('getAvatar')->andReturn(null);
+
+    $provider = Mockery::mock(AbstractProvider::class);
+    $provider->shouldReceive('stateless')->andReturnSelf();
+    $provider->shouldReceive('userFromToken')->with('ok-token')->andReturn($socialUser);
+    Socialite::shouldReceive('driver')->with('google')->andReturn($provider);
+
+    $this->postJson('/api/auth/google', ['access_token' => 'ok-token'])->assertOk();
 
     Event::assertDispatched(LoginSucceeded::class, function (LoginSucceeded $event) use ($user): bool {
-        return $event->subject instanceof TestUser
-            && $event->subject->is($user)
-            && $event->driver === 'password'
+        return $event->subject->is($user)
+            && $event->driver === 'google'
             && $event->flavor === 'api';
     });
 });
 
-it('fires LoginFailed with reason on bad credentials', function (): void {
+it('fires LoginFailed when google token is invalid', function (): void {
     /** @var TestCase $this */
-    $this->createUser();
+    $provider = Mockery::mock(AbstractProvider::class);
+    $provider->shouldReceive('stateless')->andReturnSelf();
+    $provider->shouldReceive('userFromToken')->andThrow(new RuntimeException('bad token'));
+    Socialite::shouldReceive('driver')->with('google')->andReturn($provider);
 
-    $this->postJson('/api/auth/login', [
-        'email' => 'user@example.com',
-        'password' => 'wrong-password',
-    ])->assertUnauthorized();
+    $this->postJson('/api/auth/google', ['access_token' => 'bad'])->assertUnauthorized();
 
     Event::assertDispatched(LoginFailed::class, function (LoginFailed $event): bool {
-        return $event->driver === 'password'
-            && $event->reason === 'invalid_credentials';
+        return $event->driver === 'google'
+            && $event->reason === 'google_authentication_failed';
     });
 });
 

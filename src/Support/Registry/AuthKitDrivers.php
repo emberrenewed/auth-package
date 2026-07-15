@@ -10,10 +10,10 @@ namespace Technobase\AuthKit\Support\Registry;
  * Supports two config shapes:
  *
  * 1. Boolean map (preferred):
- *    ['password' => true, 'google' => true, 'facebook' => false]
+ *    ['google' => true, 'facebook' => true, 'phone_otp' => false]
  *
  * 2. Flat list (legacy):
- *    ['password', 'google']
+ *    ['google', 'facebook']
  */
 final class AuthKitDrivers
 {

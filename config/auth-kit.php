@@ -2,8 +2,7 @@
 
 declare(strict_types=1);
 
-use Technobase\AuthKit\Otp\Channels\MailOtpChannel;
-use Technobase\AuthKit\Otp\Channels\WhatsAppCloudChannel;
+use Technobase\AuthKit\Otp\Channels\IraqiSmsChannel;
 use Technobase\AuthKit\Support\Subjects\EloquentSubjectResolver;
 
 return [
@@ -44,37 +43,24 @@ return [
     | Enabled drivers
     |--------------------------------------------------------------------------
     |
-    | Set a driver to true to enable it, false to disable it. Package consumers
-    | can keep only the providers they need (e.g. Google only, Facebook only).
+    | This package supports:
+    | - google
+    | - facebook
+    | - phone_otp (Iraqi SMS: Asiacell 077/078, Korek 075, Zain 079)
     |
-    | Legacy list form is still supported: ['password', 'google'].
+    | Legacy list form is still supported: ['google', 'facebook'].
     |
     */
     'drivers' => [
         'web' => [
-            'password' => true,
             'google' => true,
             'facebook' => true,
-            'github' => true,
         ],
         'api' => [
-            'password' => true,
             'google' => true,
             'facebook' => true,
-            'github' => true,
-            'email_otp' => true,
-            'whatsapp_otp' => true,
+            'phone_otp' => true,
         ],
-    ],
-
-    'throttle' => [
-        'max_attempts' => 5,
-        'decay_minutes' => 1,
-    ],
-
-    'password_reset' => [
-        'token_lifetime_seconds' => 30,
-        'broker' => 'users',
     ],
 
     'otp' => [
@@ -82,8 +68,7 @@ return [
         'ttl_seconds' => 300,
         'max_attempts' => 5,
         'channels' => [
-            'email' => MailOtpChannel::class,
-            'whatsapp' => WhatsAppCloudChannel::class,
+            'sms' => IraqiSmsChannel::class,
         ],
     ],
 ];

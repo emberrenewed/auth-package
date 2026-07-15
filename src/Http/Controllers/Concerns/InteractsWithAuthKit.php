@@ -52,15 +52,12 @@ trait InteractsWithAuthKit
     protected function failureMessage(string $reason): string
     {
         return match ($reason) {
-            'too_many_attempts' => 'Too many login attempts. Try again in '
-                .((int) config('auth-kit.throttle.decay_minutes', 1) * 60)
-                .' s.',
             'social_failed',
             'google_authentication_failed',
-            'facebook_authentication_failed',
-            'github_authentication_failed',
-            'otp_invalid',
-            'otp_expired' => 'Social authentication failed. Please try again.',
+            'facebook_authentication_failed' => 'Social authentication failed. Please try again.',
+            'otp_invalid' => 'The verification code is invalid.',
+            'otp_expired' => 'The verification code has expired.',
+            'invalid_iraqi_mobile' => 'Enter a valid Iraqi mobile number (Asiacell, Korek Telecom, or Zain Iraq).',
             default => 'These credentials do not match our records.',
         };
     }

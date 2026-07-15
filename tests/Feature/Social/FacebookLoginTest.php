@@ -23,23 +23,6 @@ it('authenticates via facebook access_token', function (): void {
         ->assertJsonStructure(['token']);
 });
 
-it('authenticates via github access_token', function (): void {
-    /** @var TestCase $this */
-    $this->createUser([
-        'email' => 'github@example.com',
-        'provider' => 'github',
-        'provider_id' => 'gh-123',
-    ]);
-
-    mockSocialToken('github', 'valid-token', mockSocialUser('gh-123', 'github@example.com', 'GH User'));
-
-    $this->postJson('/api/auth/github', [
-        'access_token' => 'valid-token',
-    ])->assertOk()
-        ->assertJsonPath('data.user.email', 'github@example.com')
-        ->assertJsonStructure(['token']);
-});
-
 it('returns 401 when facebook token is invalid', function (): void {
     /** @var TestCase $this */
     $provider = Mockery::mock(AbstractProvider::class);

@@ -10,9 +10,9 @@ use Illuminate\Support\Facades\File;
 final class InstallCommand extends Command
 {
     protected $signature = 'auth-kit:install
-                            {--force : Overwrite existing OAuth/OTP env placeholders}';
+                            {--force : Overwrite existing OAuth/SMS env placeholders}';
 
-    protected $description = 'Publish Auth Kit assets and auto-add social/OTP keys to .env / services.php';
+    protected $description = 'Publish Auth Kit assets and auto-add Google / Facebook / Iraqi SMS keys';
 
     /** @var array<string, string> */
     private const ENV_DEFAULTS = [
@@ -22,12 +22,9 @@ final class InstallCommand extends Command
         'FACEBOOK_CLIENT_ID' => '',
         'FACEBOOK_CLIENT_SECRET' => '',
         'FACEBOOK_REDIRECT_URI' => '"${APP_URL}/auth/facebook/callback"',
-        'GITHUB_CLIENT_ID' => '',
-        'GITHUB_CLIENT_SECRET' => '',
-        'GITHUB_REDIRECT_URI' => '"${APP_URL}/auth/github/callback"',
-        'WHATSAPP_TOKEN' => '',
-        'WHATSAPP_PHONE_NUMBER_ID' => '',
-        'WHATSAPP_OTP_TEMPLATE' => 'auth_otp',
+        'IRAQI_SMS_ENDPOINT' => '',
+        'IRAQI_SMS_TOKEN' => '',
+        'IRAQI_SMS_FROM' => '',
     ];
 
     /** @var array<string, array{client_id: string, client_secret: string, redirect: string}> */
@@ -42,11 +39,6 @@ final class InstallCommand extends Command
             'client_secret' => 'FACEBOOK_CLIENT_SECRET',
             'redirect' => 'FACEBOOK_REDIRECT_URI',
         ],
-        'github' => [
-            'client_id' => 'GITHUB_CLIENT_ID',
-            'client_secret' => 'GITHUB_CLIENT_SECRET',
-            'redirect' => 'GITHUB_REDIRECT_URI',
-        ],
     ];
 
     public function handle(): int
@@ -58,7 +50,7 @@ final class InstallCommand extends Command
 
         $this->newLine();
         $this->info('Auth Kit installed.');
-        $this->line('Fill .env with Google / Facebook / GitHub / WhatsApp credentials, then:');
+        $this->line('Fill .env with Google / Facebook / Iraqi SMS credentials, then:');
         $this->line('  php artisan migrate');
         $this->line('  php artisan serve');
 
@@ -128,63 +120,46 @@ final class InstallCommand extends Command
         $contents = File::get($path);
 
         foreach (self::SERVICES as $name => $env) {
-            if (preg_match("/['\"]".preg_quote($name, '/')."['\"]\s*=>/", $contents) === 1) {
-                $this->components->twoColumnDetail('config/services.php', "{$name} already configured");
-
-                continue;
-            }
-
-            $block = <<<PHP
+            $contents = $this->injectServiceBlock($path, $contents, $name, <<<PHP
 
     '{$name}' => [
         'client_id' => env('{$env['client_id']}'),
         'client_secret' => env('{$env['client_secret']}'),
         'redirect' => env('{$env['redirect']}'),
     ],
-PHP;
-
-            $updated = preg_replace('/\];\s*$/', $block."\n];\n", $contents, 1);
-
-            if ($updated === null || $updated === $contents) {
-                $this->components->warn("Could not auto-edit config/services.php for {$name}.");
-
-                continue;
-            }
-
-            $contents = $updated;
-            File::put($path, $contents);
-            $this->components->twoColumnDetail('config/services.php', "Added {$name} Socialite config");
+PHP);
         }
 
-        $this->ensureWhatsAppServices($path, $contents);
+        $this->injectServiceBlock($path, $contents, 'iraqi_sms', <<<'PHP'
+
+    'iraqi_sms' => [
+        'endpoint' => env('IRAQI_SMS_ENDPOINT'),
+        'token' => env('IRAQI_SMS_TOKEN'),
+        'from' => env('IRAQI_SMS_FROM'),
+        'message_template' => 'Your Auth Kit verification code is: %s',
+    ],
+PHP);
     }
 
-    private function ensureWhatsAppServices(string $path, string $contents): void
+    private function injectServiceBlock(string $path, string $contents, string $name, string $block): string
     {
-        if (preg_match("/['\"]whatsapp['\"]\s*=>/", $contents) === 1) {
-            $this->components->twoColumnDetail('config/services.php', 'whatsapp already configured');
+        if (preg_match("/['\"]".preg_quote($name, '/')."['\"]\s*=>/", $contents) === 1) {
+            $this->components->twoColumnDetail('config/services.php', "{$name} already configured");
 
-            return;
+            return $contents;
         }
-
-        $block = <<<'PHP'
-
-    'whatsapp' => [
-        'token' => env('WHATSAPP_TOKEN'),
-        'phone_number_id' => env('WHATSAPP_PHONE_NUMBER_ID'),
-        'otp_template' => env('WHATSAPP_OTP_TEMPLATE', 'auth_otp'),
-    ],
-PHP;
 
         $updated = preg_replace('/\];\s*$/', $block."\n];\n", $contents, 1);
 
         if ($updated === null || $updated === $contents) {
-            $this->components->warn('Could not auto-edit config/services.php for whatsapp.');
+            $this->components->warn("Could not auto-edit config/services.php for {$name}.");
 
-            return;
+            return $contents;
         }
 
         File::put($path, $updated);
-        $this->components->twoColumnDetail('config/services.php', 'Added whatsapp Cloud API config');
+        $this->components->twoColumnDetail('config/services.php', "Added {$name} config");
+
+        return $updated;
     }
 }

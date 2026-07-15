@@ -9,12 +9,13 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Technobase\AuthKit\Contracts\Otp\OtpChannel;
 use Technobase\AuthKit\Exceptions\InvalidCredentialsException;
+use Technobase\AuthKit\Support\Phone\IraqiMobile;
 
 final class OtpManager
 {
     public function send(string $channel, string $destination): void
     {
-        $destination = $this->normalizeDestination($channel, $destination);
+        $destination = $this->normalizeDestination($destination);
         $code = $this->generateCode();
 
         DB::table('auth_kit_otps')->updateOrInsert(
@@ -36,7 +37,7 @@ final class OtpManager
 
     public function verify(string $channel, string $destination, string $code): bool
     {
-        $destination = $this->normalizeDestination($channel, $destination);
+        $destination = $this->normalizeDestination($destination);
 
         $row = DB::table('auth_kit_otps')
             ->where('channel', $channel)
@@ -102,14 +103,10 @@ final class OtpManager
         return str_pad((string) random_int(0, $max), $length, '0', STR_PAD_LEFT);
     }
 
-    private function normalizeDestination(string $channel, string $destination): string
+    private function normalizeDestination(string $destination): string
     {
-        $destination = trim($destination);
+        $mobile = IraqiMobile::tryParse($destination);
 
-        if ($channel === 'whatsapp') {
-            return preg_replace('/\D+/', '', $destination) ?? $destination;
-        }
-
-        return strtolower($destination);
+        return $mobile?->digits ?? (preg_replace('/\D+/', '', trim($destination)) ?? trim($destination));
     }
 }

@@ -5,9 +5,10 @@ declare(strict_types=1);
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Foundation\Auth\User as AuthenticatableUser;
 use Illuminate\Http\Request;
+use Laravel\Socialite\Contracts\User as SocialiteUserContract;
 use Laravel\Socialite\Facades\Socialite;
+use Laravel\Socialite\Two\AbstractProvider;
 use Technobase\AuthKit\Drivers\Social\GoogleDriver;
-use Technobase\AuthKit\Drivers\Password\PasswordDriver;
 use Technobase\AuthKit\Exceptions\InvalidCredentialsException;
 use Technobase\AuthKit\Http\CredentialIssuers\SanctumCredentialIssuer;
 use Technobase\AuthKit\Support\Registry\DriverRegistry;
@@ -32,11 +33,11 @@ it('throws when socialite provider is not an oauth2 abstract provider', function
 
 it('clears cached drivers when extend is called', function (): void {
     $registry = app(DriverRegistry::class);
-    $first = $registry->driver('password');
+    $first = $registry->driver('google');
 
-    $registry->extend('password', fn ($app) => $app->make(PasswordDriver::class));
+    $registry->extend('google', fn ($app) => $app->make(GoogleDriver::class));
 
-    $second = $registry->driver('password');
+    $second = $registry->driver('google');
 
     expect($first)->not->toBe($second);
 });
@@ -83,13 +84,18 @@ it('requires createToken support on sanctum issuer', function (): void {
         ->toThrow(RuntimeException::class);
 });
 
-it('detects banned subjects via banned_at attribute', function (): void {
+it('blocks banned subjects after social login', function (): void {
     /** @var TestCase $this */
     $model = new class extends AuthenticatableUser
     {
         protected $table = 'users';
 
         protected $guarded = [];
+
+        public function createToken(string $name, array $abilities = ['*'], $expiresAt = null)
+        {
+            throw new RuntimeException('should not issue token for banned user');
+        }
     };
 
     $model->newQuery()->create([
@@ -97,14 +103,24 @@ it('detects banned subjects via banned_at attribute', function (): void {
         'last_name' => 'Ned',
         'email' => 'banned-plain@example.com',
         'password' => bcrypt('password'),
+        'provider' => 'google',
+        'provider_id' => 'banned-google',
         'banned_at' => now(),
     ]);
 
     config()->set('auth.providers.users.model', $model::class);
     config()->set('auth-kit.subjects.api.model', $model::class);
 
-    $this->postJson('/api/auth/login', [
-        'email' => 'banned-plain@example.com',
-        'password' => 'password',
-    ])->assertForbidden();
+    $socialUser = Mockery::mock(SocialiteUserContract::class);
+    $socialUser->shouldReceive('getId')->andReturn('banned-google');
+    $socialUser->shouldReceive('getEmail')->andReturn('banned-plain@example.com');
+    $socialUser->shouldReceive('getName')->andReturn('Banned');
+    $socialUser->shouldReceive('getAvatar')->andReturn(null);
+
+    $provider = Mockery::mock(AbstractProvider::class);
+    $provider->shouldReceive('stateless')->andReturnSelf();
+    $provider->shouldReceive('userFromToken')->with('token')->andReturn($socialUser);
+    Socialite::shouldReceive('driver')->with('google')->andReturn($provider);
+
+    $this->postJson('/api/auth/google', ['access_token' => 'token'])->assertForbidden();
 });

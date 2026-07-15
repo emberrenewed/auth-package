@@ -53,32 +53,23 @@ abstract class TestCase extends Orchestra
             'driver' => 'sanctum',
             'provider' => 'users',
         ]);
-        $app['config']->set('auth.passwords.users', [
-            'provider' => 'users',
-            'table' => 'password_reset_tokens',
-            'expire' => 60,
-            'throttle' => 60,
-        ]);
 
         $app['config']->set('auth-kit.subjects.web.model', TestUser::class);
         $app['config']->set('auth-kit.subjects.api.model', TestUser::class);
         $app['config']->set('auth-kit.subjects.api.lookup_columns', ['email', 'phone']);
         $app['config']->set('auth-kit.subjects.web.auto_create_on_social', true);
         $app['config']->set('auth-kit.subjects.api.auto_create_on_social', false);
-        $app['config']->set('auth-kit.drivers.web', ['password', 'google', 'facebook', 'github']);
-        $app['config']->set('auth-kit.drivers.api', [
-            'password',
-            'google',
-            'facebook',
-            'github',
-            'email_otp',
-            'whatsapp_otp',
+        $app['config']->set('auth-kit.drivers.web', [
+            'google' => true,
+            'facebook' => true,
         ]);
-        $app['config']->set('auth-kit.throttle.max_attempts', 5);
-        $app['config']->set('auth-kit.throttle.decay_minutes', 1);
-        $app['config']->set('auth-kit.password_reset.broker', 'users');
+        $app['config']->set('auth-kit.drivers.api', [
+            'google' => true,
+            'facebook' => true,
+            'phone_otp' => true,
+        ]);
         $app['config']->set('auth-kit.routes.enabled', true);
-        $app['config']->set('auth-kit.otp.channels.whatsapp', LogOtpChannel::class);
+        $app['config']->set('auth-kit.otp.channels.sms', LogOtpChannel::class);
 
         $app['config']->set('services.google', [
             'client_id' => 'testing-client-id',
@@ -90,16 +81,10 @@ abstract class TestCase extends Orchestra
             'client_secret' => 'testing-facebook-secret',
             'redirect' => 'http://localhost/auth/facebook/callback',
         ]);
-        $app['config']->set('services.github', [
-            'client_id' => 'testing-github-id',
-            'client_secret' => 'testing-github-secret',
-            'redirect' => 'http://localhost/auth/github/callback',
-        ]);
     }
 
     protected function defineRoutes($router): void
     {
-        $router->get('/reset-password/{token}', fn () => 'reset')->name('password.reset');
         $router->get('/home', fn () => 'home')->name('home');
         $router->get('/register/complete', fn () => 'complete')->name('register.complete');
         $router->get('/login', fn () => 'login')->name('login');
@@ -142,21 +127,6 @@ abstract class TestCase extends Orchestra
             $table->text('abilities')->nullable();
             $table->timestamp('last_used_at')->nullable();
             $table->timestamp('expires_at')->nullable();
-            $table->timestamps();
-        });
-
-        Schema::create('password_reset_tokens', function (Blueprint $table): void {
-            $table->string('email')->primary();
-            $table->string('token');
-            $table->timestamp('created_at')->nullable();
-        });
-
-        Schema::create('notifications', function (Blueprint $table): void {
-            $table->uuid('id')->primary();
-            $table->string('type');
-            $table->morphs('notifiable');
-            $table->text('data');
-            $table->timestamp('read_at')->nullable();
             $table->timestamps();
         });
 

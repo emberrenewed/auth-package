@@ -16,7 +16,7 @@ use Throwable;
 abstract class AbstractSocialiteDriver implements AuthDriver
 {
     public function __construct(
-        private readonly string $flavor = 'api',
+        protected readonly string $flavor = 'api',
     ) {}
 
     abstract public function name(): string;

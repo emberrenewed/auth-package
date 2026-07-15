@@ -7,9 +7,11 @@ namespace Technobase\AuthKit\Drivers\Otp;
 use Illuminate\Http\Request;
 use Technobase\AuthKit\Contracts\Drivers\AuthDriver;
 use Technobase\AuthKit\Otp\OtpManager;
+use Technobase\AuthKit\Rules\IraqiMobileRule;
 use Technobase\AuthKit\Support\Identity\NormalizedIdentity;
+use Technobase\AuthKit\Support\Phone\IraqiMobile;
 
-final class EmailOtpDriver implements AuthDriver
+final class PhoneOtpDriver implements AuthDriver
 {
     public function __construct(
         private readonly OtpManager $otp,
@@ -17,7 +19,7 @@ final class EmailOtpDriver implements AuthDriver
 
     public function name(): string
     {
-        return 'email_otp';
+        return 'phone_otp';
     }
 
     /**
@@ -26,7 +28,7 @@ final class EmailOtpDriver implements AuthDriver
     public function validate(Request $request): array
     {
         return $request->validate([
-            'email' => ['required', 'email'],
+            'phone' => ['required', 'string', new IraqiMobileRule],
             'code' => ['required', 'string'],
         ]);
     }
@@ -36,17 +38,22 @@ final class EmailOtpDriver implements AuthDriver
      */
     public function resolveIdentity(array $payload): NormalizedIdentity
     {
-        $email = strtolower(trim((string) $payload['email']));
+        $mobile = IraqiMobile::parse((string) $payload['phone']);
         $code = (string) $payload['code'];
 
-        $this->otp->verify('email', $email, $code);
+        $this->otp->verify('sms', $mobile->digits, $code);
 
         return new NormalizedIdentity(
-            provider: 'email_otp',
-            providerId: $email,
-            email: $email,
+            provider: 'phone_otp',
+            providerId: $mobile->digits,
+            email: null,
             name: null,
             avatar: null,
+            phone: $mobile->digits,
+            raw: [
+                'carrier' => $mobile->carrier->value,
+                'carrier_label' => $mobile->carrier->label(),
+            ],
         );
     }
 }
