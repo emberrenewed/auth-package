@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-07-15
+
+### Changed
+
+- Auth Kit now focuses on **Google**, **Facebook**, and **Iraqi phone OTP** only
+- OTP delivery uses Iraqi SMS (`IraqiSmsChannel`) instead of mail / WhatsApp
+- Install command seeds Google / Facebook / Iraqi SMS env + `services.php` keys
+
+### Added
+
+- `phone_otp` driver with Iraqi mobile validation (Asiacell / Korek / Zain)
+- `IraqiMobile`, `IraqiCarrier`, and `IraqiMobileRule` helpers
+- Phone OTP feature tests and Iraqi mobile unit tests
+
+### Removed
+
+- Password login and forgot / reset password flows
+- Email OTP and WhatsApp OTP drivers / channels
+- GitHub social driver
+
 ## [1.1.0] - 2026-07-14
 
 ### Changed

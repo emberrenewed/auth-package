@@ -1,6 +1,6 @@
 {
     "name": "emberrenewed/laravel-auth-kit",
-    "description": "Laravel authentication kit with multi-driver support",
+    "description": "Laravel auth kit: Google, Facebook, and Iraqi phone OTP",
     "type": "library",
     "license": "MIT",
     "require": {
